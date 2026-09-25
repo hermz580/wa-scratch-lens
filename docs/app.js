@@ -4,6 +4,8 @@ const DATA_URL = 'data/latest.json';
 const POLL_MS = 5 * 60 * 1000;
 const PUBLISH_DELAY_MS = 4 * 60 * 1000; // scheduled job + Pages deploy take a few minutes
 const SIM_RUNS = 3000, SIM_MAX_TICKETS = 2000;
+// Where "Did you win?" emails go. Leave empty to hide the email button.
+const WIN_EMAIL = 'harpstarunlimited@gmail.com';
 const VERDICT = {best: 'Best bet', good: 'Good value', fair: 'Fair', skip: 'Skip'};
 
 const store = {
@@ -113,9 +115,32 @@ function winTruth(g) {
 function scoreBadge(g) { return `<span class="score v-${g.verdict}" title="Smart Score"><b>${g.score}</b><small>${VERDICT[g.verdict]}</small></span>`; }
 function thumb(g) { return `<img class="thumb" src="${safe(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`; }
 
+// The scheduled robot (GitHub Action) only commits when WA's numbers change,
+// so "last checked" comes from its public run history instead of the data file.
+const ROBOT_RUNS = 'https://api.github.com/repos/hermz580/wa-scratch-lens/actions/workflows/update-data.yml/runs?per_page=1';
+let robot = null, robotFetchedAt = 0;
+async function loadRobot() {
+  if (Date.now() - robotFetchedAt < 4 * 60 * 1000) return;
+  robotFetchedAt = Date.now();
+  try {
+    const r = await fetch(ROBOT_RUNS, {headers: {Accept: 'application/vnd.github+json'}});
+    const run = r.ok ? (await r.json()).workflow_runs?.[0] : null;
+    if (run) robot = {at: new Date(run.updated_at || run.created_at), status: run.status, ok: run.conclusion === 'success'};
+  } catch { /* offline or rate-limited: keep the last known value */ }
+  if (data) renderStatus();
+}
+
 function renderStatus() {
-  $('#source-line').innerHTML = `WA Lottery published: <b>${safe(sourceLabel(data.source_updated))}</b>`;
-  $('#changed-line').textContent = `App data changed ${ago(new Date(data.generated_at))} · ${data.game_count} games`;
+  $('#source-line').innerHTML = `WA Lottery published: <b>${safe(sourceLabel(data.source_updated))}</b> · ${data.game_count} games`;
+  let robotText = 'Robot status loading…';
+  if (robot) {
+    const late = Date.now() - robot.at > 75 * 60 * 1000;
+    robotText = robot.status !== 'completed' ? '🔄 Robot is checking right now…'
+      : !robot.ok ? `⚠️ Robot's last check ${ago(robot.at)} failed — will retry`
+      : late ? `⏳ Robot last checked ${ago(robot.at)} (GitHub is running late)`
+      : `✅ Robot checked ${ago(robot.at)}`;
+  }
+  $('#changed-line').textContent = `${robotText} · numbers last changed ${ago(new Date(data.generated_at))}`;
 }
 
 function nextCheck(minutes) {
@@ -130,9 +155,10 @@ function tick() {
   if (!nextCheckAt || Date.now() > nextCheckAt.getTime() + PUBLISH_DELAY_MS) {
     if (nextCheckAt) load(true);
     nextCheckAt = nextCheck(data.check_minutes || [7, 37]);
+    robotFetchedAt = 0; loadRobot();
   }
   const left = nextCheckAt - Date.now();
-  const span = 60000 * ((data.check_minutes || [7, 37]).length > 1 ? 30 : 60);
+  const span = 60000 * 60 / (data.check_minutes || [7, 37]).length;
   if (left > 0) {
     const m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
     $('#countdown').textContent = `${m}:${String(s).padStart(2, '0')}`;
@@ -246,6 +272,25 @@ function renderTracker() {
   $('#log-list').innerHTML = log.slice(-8).reverse().map((r, i) => `<div class="log-row"><span>${safe(r.date)}</span><b>${safe(r.name)}</b><span class="${r.won - r.spent >= 0 ? 'pos' : 'neg'}">${money(r.won - r.spent)}</span><button class="ghost small" data-del="${log.length - 1 - i}" aria-label="Delete">✕</button></div>`).join('');
 }
 
+// ---------- did you win? ----------
+function renderWinBox() {
+  const current = $('#win-game').value;
+  $('#win-game').innerHTML = '<option value="">Which game?</option>' + [...data.games].sort((a, b) => a.name.localeCompare(b.name)).map(g => `<option value="${g.id}">${safe(g.name)} (${money(g.cost)})</option>`).join('');
+  $('#win-game').value = current;
+  $('#win-email').hidden = !WIN_EMAIL;
+}
+$('#win-form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!WIN_EMAIL) return;
+  const g = data?.games.find(x => String(x.id) === $('#win-game').value);
+  const amount = Number($('#win-amount').value) || 0;
+  const name = $('#win-name').value.trim();
+  const subject = `I won${amount ? ` ${money(amount)}` : ''}${g ? ` on ${g.name}` : ''}! 🎉`;
+  const body = [`Game: ${g ? `${g.name} (${money(g.cost)})` : 'not picked'}`, `Won: ${amount ? money(amount) : 'not given'}`,
+    name ? `From: ${name}` : '', '', $('#win-comment').value.trim(), '', '— sent from WA Scratch Lens'].filter((l, i) => l || i > 2).join('\n');
+  location.href = `mailto:${WIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
+
 // ---------- new-ticket alerts ----------
 function checkNewForUser() {
   const seen = store.get('seen-ids', null), ids = data.games.map(g => g.id);
@@ -268,6 +313,7 @@ function showBanner(text) { const b = $('#banner'); b.textContent = text; b.hidd
 
 // ---------- data ----------
 async function load(quiet = false) {
+  loadRobot();
   document.body.classList.add('loading');
   try {
     const r = await fetch(`${DATA_URL}?t=${Math.floor(Date.now() / 60000)}`, {cache: 'no-store'});
@@ -277,7 +323,7 @@ async function load(quiet = false) {
     if (changed) {
       if (data && quiet) showBanner('✨ Fresh lottery data just loaded.');
       data = next; simCache.clear();
-      renderStatus(); renderPick(); renderFeed(); renderList(); renderTracker(); checkNewForUser();
+      renderStatus(); renderPick(); renderFeed(); renderList(); renderTracker(); renderWinBox(); checkNewForUser();
     } else renderStatus();
   } catch (e) {
     if (!data) $('#pick-body').innerHTML = `<p class="muted">Couldn't load game data (${safe(e.message)}). Check your connection and tap ↻.</p>`;

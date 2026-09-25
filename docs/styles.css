@@ -246,3 +246,17 @@ footer b { color: var(--ink); }
 }
 @media (prefers-reduced-motion: reduce) { .slots { transition: none; } .slots.win .reels, .slots.jackpot .reels { animation: none; } }
 body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+
+/* ---------- did you win? ---------- */
+.win-box { border-color: rgba(242,193,78,.45); background: linear-gradient(180deg, rgba(242,193,78,.08), var(--card) 60%); }
+.win-form { display: grid; grid-template-columns: 1fr 110px; gap: 8px; margin-top: 10px; }
+.win-form select, .win-form input, .win-form textarea { min-width: 0; width: 100%; font: inherit; font-size: .9rem; color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; }
+.win-form #win-name, .win-form textarea, .win-form button { grid-column: 1 / -1; }
+.win-form textarea { resize: vertical; }
+.win-form button { border: 0; border-radius: 12px; padding: 11px; font-weight: 800; color: #1a1200; background: var(--gold-metal); }
+.tip { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.tip p { margin: 0 0 10px; }
+.tip-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tip-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid #00d64f; color: #00d64f; font-weight: 800; text-decoration: none; }
+.cashapp { flex: 1; min-width: 170px; text-align: center; padding: 10px 14px; border-radius: 12px; background: #00d64f; color: #fff; font-weight: 700; text-decoration: none; }
