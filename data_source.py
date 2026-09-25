@@ -3,6 +3,8 @@ import re
 import urllib.request
 
 SOURCE_URL = "https://walottery.com/Scratch/explorer.aspx"
+# The main Scratch page embeds the same game dataset; used if the explorer fails.
+FALLBACK_URLS = ("https://www.walottery.com/Scratch/",)
 
 
 def extract_games(html: str) -> list[dict]:
@@ -26,8 +28,18 @@ def extract_games(html: str) -> list[dict]:
     return games
 
 
-def fetch_games(timeout: int = 30) -> list[dict]:
-    request = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "Mozilla/5.0 WA-Scratch-Advisor/1.0"})
+def _fetch_html(url: str, timeout: int) -> str:
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 WA-Scratch-Advisor/1.0"})
     with urllib.request.urlopen(request, timeout=timeout) as response:
-        html = response.read().decode("utf-8", errors="replace")
-    return extract_games(html)
+        return response.read().decode("utf-8", errors="replace")
+
+
+def fetch_games(timeout: int = 30, fetch_html=_fetch_html) -> list[dict]:
+    """Read the official game dataset, trying the backup page if the explorer fails."""
+    errors = []
+    for url in (SOURCE_URL, *FALLBACK_URLS):
+        try:
+            return extract_games(fetch_html(url, timeout))
+        except Exception as exc:  # network error or page layout change
+            errors.append(f"{url}: {exc}")
+    raise ValueError("All WA Lottery sources failed: " + "; ".join(errors))
