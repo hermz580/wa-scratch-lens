@@ -4,6 +4,8 @@ const DATA_URL = 'data/latest.json';
 const POLL_MS = 5 * 60 * 1000;
 const PUBLISH_DELAY_MS = 4 * 60 * 1000; // scheduled job + Pages deploy take a few minutes
 const SIM_RUNS = 3000, SIM_MAX_TICKETS = 2000;
+// Where "Did you win?" emails go. Leave empty to hide the email button.
+const WIN_EMAIL = 'harpstarunlimited@gmail.com';
 const VERDICT = {best: 'Best bet', good: 'Good value', fair: 'Fair', skip: 'Skip'};
 
 const store = {
@@ -246,6 +248,25 @@ function renderTracker() {
   $('#log-list').innerHTML = log.slice(-8).reverse().map((r, i) => `<div class="log-row"><span>${safe(r.date)}</span><b>${safe(r.name)}</b><span class="${r.won - r.spent >= 0 ? 'pos' : 'neg'}">${money(r.won - r.spent)}</span><button class="ghost small" data-del="${log.length - 1 - i}" aria-label="Delete">✕</button></div>`).join('');
 }
 
+// ---------- did you win? ----------
+function renderWinBox() {
+  const current = $('#win-game').value;
+  $('#win-game').innerHTML = '<option value="">Which game?</option>' + [...data.games].sort((a, b) => a.name.localeCompare(b.name)).map(g => `<option value="${g.id}">${safe(g.name)} (${money(g.cost)})</option>`).join('');
+  $('#win-game').value = current;
+  $('#win-email').hidden = !WIN_EMAIL;
+}
+$('#win-form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (!WIN_EMAIL) return;
+  const g = data?.games.find(x => String(x.id) === $('#win-game').value);
+  const amount = Number($('#win-amount').value) || 0;
+  const name = $('#win-name').value.trim();
+  const subject = `I won${amount ? ` ${money(amount)}` : ''}${g ? ` on ${g.name}` : ''}! 🎉`;
+  const body = [`Game: ${g ? `${g.name} (${money(g.cost)})` : 'not picked'}`, `Won: ${amount ? money(amount) : 'not given'}`,
+    name ? `From: ${name}` : '', '', $('#win-comment').value.trim(), '', '— sent from WA Scratch Lens'].filter((l, i) => l || i > 2).join('\n');
+  location.href = `mailto:${WIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
+
 // ---------- new-ticket alerts ----------
 function checkNewForUser() {
   const seen = store.get('seen-ids', null), ids = data.games.map(g => g.id);
@@ -277,7 +298,7 @@ async function load(quiet = false) {
     if (changed) {
       if (data && quiet) showBanner('✨ Fresh lottery data just loaded.');
       data = next; simCache.clear();
-      renderStatus(); renderPick(); renderFeed(); renderList(); renderTracker(); checkNewForUser();
+      renderStatus(); renderPick(); renderFeed(); renderList(); renderTracker(); renderWinBox(); checkNewForUser();
     } else renderStatus();
   } catch (e) {
     if (!data) $('#pick-body').innerHTML = `<p class="muted">Couldn't load game data (${safe(e.message)}). Check your connection and tap ↻.</p>`;

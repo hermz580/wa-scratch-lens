@@ -85,6 +85,27 @@
     <div id="game-list" class="game-list"></div>
   </section>
 
+  <section class="card win-box" id="did-you-win">
+    <div class="head"><h2>🎉 Did you win?</h2></div>
+    <p class="muted small">Hit something good? Tell Harpstar about it — we love hearing your wins.</p>
+    <form id="win-form" class="win-form">
+      <select id="win-game" aria-label="Which game"></select>
+      <input id="win-amount" type="number" inputmode="decimal" min="0" step="1" placeholder="Won $" aria-label="Amount won">
+      <input id="win-name" type="text" maxlength="40" placeholder="Your name (optional)" aria-label="Your name">
+      <textarea id="win-comment" rows="3" maxlength="500" placeholder="Tell us about it…" aria-label="Comment"></textarea>
+      <button id="win-email" type="submit" hidden>✉️ Email us your win</button>
+    </form>
+    <div class="tip">
+      <p><b>Feeling lucky? Send us a lil sumtin 💸</b><br><span class="muted small">Totally optional — tips keep the app free. They don't change anyone's odds.</span></p>
+      <div class="tip-row">
+        <a class="tip-chip" href="https://cash.app/$nasgoth/1" target="_blank" rel="noopener">$1</a>
+        <a class="tip-chip" href="https://cash.app/$nasgoth/5" target="_blank" rel="noopener">$5</a>
+        <a class="tip-chip" href="https://cash.app/$nasgoth/10" target="_blank" rel="noopener">$10</a>
+        <a class="cashapp" href="https://cash.app/$nasgoth" target="_blank" rel="noopener">Cash App <b>$nasgoth</b></a>
+      </div>
+    </div>
+  </section>
+
   <section class="card" id="tracker">
     <div class="head"><h2>My results</h2><span class="muted small">Saved only on this phone</span></div>
     <form id="log-form" class="log-form">

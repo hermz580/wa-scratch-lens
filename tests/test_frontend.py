@@ -46,6 +46,14 @@ class FrontendTests(unittest.TestCase):
         self.assertNotIn("background-clip", burst_rule)
         self.assertNotIn("filter", burst_rule)
 
+    def test_did_you_win_box_links_cash_app(self):
+        html = (DOCS / "index.html").read_text(encoding="utf-8")
+        script = (DOCS / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="did-you-win"', html)
+        self.assertIn("https://cash.app/$nasgoth", html)
+        self.assertIn("WIN_EMAIL", script)
+        self.assertIn("mailto:", script)
+
     def test_manifest_icons_exist(self):
         manifest = json.loads((DOCS / "manifest.webmanifest").read_text(encoding="utf-8"))
         for icon in manifest["icons"]:
