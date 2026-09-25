@@ -1,6 +1,6 @@
 {
-  "name": "WA Scratch Lens",
-  "short_name": "Scratch Lens",
+  "name": "Scratchtastic by Harpstar",
+  "short_name": "Scratchtastic",
   "description": "Smart rankings for Washington Lottery scratch tickets, updated automatically.",
   "start_url": "./",
   "scope": "./",

@@ -285,9 +285,10 @@ $('#win-form').addEventListener('submit', e => {
   const g = data?.games.find(x => String(x.id) === $('#win-game').value);
   const amount = Number($('#win-amount').value) || 0;
   const name = $('#win-name').value.trim();
+  if (amount >= 100) window.playJackpot();
   const subject = `I won${amount ? ` ${money(amount)}` : ''}${g ? ` on ${g.name}` : ''}! 🎉`;
   const body = [`Game: ${g ? `${g.name} (${money(g.cost)})` : 'not picked'}`, `Won: ${amount ? money(amount) : 'not given'}`,
-    name ? `From: ${name}` : '', '', $('#win-comment').value.trim(), '', '— sent from WA Scratch Lens'].filter((l, i) => l || i > 2).join('\n');
+    name ? `From: ${name}` : '', '', $('#win-comment').value.trim(), '', '— sent from Scratchtastic by Harpstar'].filter((l, i) => l || i > 2).join('\n');
   location.href = `mailto:${WIN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 });
 
@@ -366,7 +367,7 @@ $('#notify-btn').addEventListener('click', async () => {
 });
 $('#share-btn').addEventListener('click', async () => {
   const url = location.href.split('#')[0];
-  try { if (navigator.share) await navigator.share({title: 'WA Scratch Lens', text: 'Smart picks for WA scratch tickets', url}); else { await navigator.clipboard.writeText(url); showBanner('Link copied — paste it to anyone.'); } } catch { /* cancelled */ }
+  try { if (navigator.share) await navigator.share({title: 'Scratchtastic by Harpstar', text: 'Smart picks for WA scratch tickets', url}); else { await navigator.clipboard.writeText(url); showBanner('Link copied — paste it to anyone.'); } } catch { /* cancelled */ }
 });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(true); });
 
@@ -384,6 +385,22 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
     box.appendChild(el);
   }
 })();
+
+// Scratchtastic theme song: click title or "by Harpstar" to play
+['#theme-trigger', '#harpstar-trigger'].forEach(id => {
+  $(id)?.addEventListener('click', () => {
+    const audio = $('#theme-audio');
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  });
+});
+
+// Jackpot sound: play when big win logged
+window.playJackpot = () => {
+  const audio = $('#jackpot-audio');
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+};
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 load();
