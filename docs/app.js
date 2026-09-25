@@ -115,9 +115,32 @@ function winTruth(g) {
 function scoreBadge(g) { return `<span class="score v-${g.verdict}" title="Smart Score"><b>${g.score}</b><small>${VERDICT[g.verdict]}</small></span>`; }
 function thumb(g) { return `<img class="thumb" src="${safe(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`; }
 
+// The scheduled robot (GitHub Action) only commits when WA's numbers change,
+// so "last checked" comes from its public run history instead of the data file.
+const ROBOT_RUNS = 'https://api.github.com/repos/hermz580/wa-scratch-lens/actions/workflows/update-data.yml/runs?per_page=1';
+let robot = null, robotFetchedAt = 0;
+async function loadRobot() {
+  if (Date.now() - robotFetchedAt < 4 * 60 * 1000) return;
+  robotFetchedAt = Date.now();
+  try {
+    const r = await fetch(ROBOT_RUNS, {headers: {Accept: 'application/vnd.github+json'}});
+    const run = r.ok ? (await r.json()).workflow_runs?.[0] : null;
+    if (run) robot = {at: new Date(run.updated_at || run.created_at), status: run.status, ok: run.conclusion === 'success'};
+  } catch { /* offline or rate-limited: keep the last known value */ }
+  if (data) renderStatus();
+}
+
 function renderStatus() {
-  $('#source-line').innerHTML = `WA Lottery published: <b>${safe(sourceLabel(data.source_updated))}</b>`;
-  $('#changed-line').textContent = `App data changed ${ago(new Date(data.generated_at))} · ${data.game_count} games`;
+  $('#source-line').innerHTML = `WA Lottery published: <b>${safe(sourceLabel(data.source_updated))}</b> · ${data.game_count} games`;
+  let robotText = 'Robot status loading…';
+  if (robot) {
+    const late = Date.now() - robot.at > 75 * 60 * 1000;
+    robotText = robot.status !== 'completed' ? '🔄 Robot is checking right now…'
+      : !robot.ok ? `⚠️ Robot's last check ${ago(robot.at)} failed — will retry`
+      : late ? `⏳ Robot last checked ${ago(robot.at)} (GitHub is running late)`
+      : `✅ Robot checked ${ago(robot.at)}`;
+  }
+  $('#changed-line').textContent = `${robotText} · numbers last changed ${ago(new Date(data.generated_at))}`;
 }
 
 function nextCheck(minutes) {
@@ -132,9 +155,10 @@ function tick() {
   if (!nextCheckAt || Date.now() > nextCheckAt.getTime() + PUBLISH_DELAY_MS) {
     if (nextCheckAt) load(true);
     nextCheckAt = nextCheck(data.check_minutes || [7, 37]);
+    robotFetchedAt = 0; loadRobot();
   }
   const left = nextCheckAt - Date.now();
-  const span = 60000 * ((data.check_minutes || [7, 37]).length > 1 ? 30 : 60);
+  const span = 60000 * 60 / (data.check_minutes || [7, 37]).length;
   if (left > 0) {
     const m = Math.floor(left / 60000), s = Math.floor(left / 1000) % 60;
     $('#countdown').textContent = `${m}:${String(s).padStart(2, '0')}`;
@@ -289,6 +313,7 @@ function showBanner(text) { const b = $('#banner'); b.textContent = text; b.hidd
 
 // ---------- data ----------
 async function load(quiet = false) {
+  loadRobot();
   document.body.classList.add('loading');
   try {
     const r = await fetch(`${DATA_URL}?t=${Math.floor(Date.now() / 60000)}`, {cache: 'no-store'});

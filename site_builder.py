@@ -20,7 +20,7 @@ from smart_score import game_metrics, score, trend
 
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "docs" / "data"
-CHECK_MINUTES = [7, 37]  # keep in sync with .github/workflows/update-data.yml
+CHECK_MINUTES = [7, 22, 37, 52]  # keep in sync with .github/workflows/update-data.yml
 NEW_GAME_DAYS = 30
 MAX_POINTS = 120
 MAX_EVENTS = 200
