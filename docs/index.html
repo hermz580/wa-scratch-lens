@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>WA Scratch Lens</title>
+  <title>Scratchtastic by Harpstar</title>
   <meta name="description" content="Smart rankings for Washington Lottery scratch tickets, updated automatically.">
   <meta name="theme-color" content="#0a0806">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Scratch Lens">
+  <meta name="apple-mobile-web-app-title" content="Scratchtastic">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -21,17 +21,20 @@
 <header class="top">
   <div class="brand">
     <img src="icons/icon.svg" alt="" width="32" height="32">
-    <span class="brand-mini">Scratch Lens</span>
+    <span class="brand-mini">Scratchtastic</span>
   </div>
   <button id="refresh" class="icon-btn" aria-label="Refresh now" title="Refresh now">↻</button>
 </header>
 
-<section class="hero" aria-label="WA Scratch Lens by Harpstar">
+<section class="hero" aria-label="Scratchtastic by Harpstar">
   <div class="burst" id="burst" aria-hidden="true"></div>
-  <h1 class="title-gold"><span data-text="WA Scratch">WA Scratch</span><span data-text="Lens">Lens</span></h1>
-  <p class="by-silver"><span data-text="by Harpstar">by Harpstar</span></p>
+  <h1 class="title-gold" id="theme-trigger" style="cursor: pointer;" title="Click to play theme song"><span data-text="Scratchtastic">Scratchtastic</span></h1>
+  <p class="by-silver" id="harpstar-trigger" style="cursor: pointer;" title="Click to play theme song"><span data-text="by Harpstar">by Harpstar</span></p>
   <p class="tagline">Smart picks for Washington scratch tickets</p>
 </section>
+
+<audio id="theme-audio" src="scratchtastic.mp3" preload="none"></audio>
+<audio id="jackpot-audio" src="jackpot.mp3" preload="none"></audio>
 
 <section class="status" id="status" aria-live="polite">
   <div class="timer">
