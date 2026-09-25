@@ -143,7 +143,7 @@ footer b { color: var(--ink); }
    lettering nor the flying $ signs use filter. */
 .hero { position: relative; overflow: hidden; text-align: center; padding: 34px 16px 22px; isolation: isolate; }
 .title-gold { position: relative; margin: 0; font-family: Cinzel, "Trajan Pro", Georgia, serif; font-weight: 900; text-transform: uppercase;
-  font-size: clamp(2.2rem, 11vw, 4.2rem); line-height: .95; letter-spacing: .03em; display: flex; flex-direction: column; align-items: center; }
+  font-size: clamp(1.6rem, 8vw, 3rem); line-height: .95; letter-spacing: .03em; display: flex; flex-direction: column; align-items: center; }
 .title-gold span, .by-silver span { position: relative; display: inline-block; }
 .title-gold span::before, .by-silver span::before { content: attr(data-text); position: absolute; inset: 0; z-index: -1; color: #5a3a05;
   -webkit-text-fill-color: #5a3a05; text-shadow: 0 2px 0 #3d2703, 0 0 18px rgba(255,200,80,.55), 0 0 36px rgba(255,190,60,.25); }
@@ -151,7 +151,7 @@ footer b { color: var(--ink); }
   background-size: 250% 100%, 100% 100%; animation: shine 3.8s ease-in-out infinite;
   -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
 @keyframes shine { 0% { background-position: 150% 0, 0 0; } 55%, 100% { background-position: -60% 0, 0 0; } }
-.by-silver { margin: 10px 0 0; font: italic 700 clamp(1.1rem, 5vw, 1.6rem) Cinzel, Georgia, serif; letter-spacing: .12em; }
+.by-silver { margin: 10px 0 0; font: italic 700 clamp(0.9rem, 4vw, 1.3rem) Cinzel, Georgia, serif; letter-spacing: .12em; }
 .by-silver span { background: var(--silver-metal); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
 .by-silver span::before { color: #2b2f35; -webkit-text-fill-color: #2b2f35; text-shadow: 0 1px 0 #16181c, 0 0 14px rgba(220,230,255,.45); }
 .tagline { margin: 8px 0 0; color: var(--muted); font-size: .9rem; }
