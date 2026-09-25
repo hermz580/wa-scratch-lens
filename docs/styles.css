@@ -1,20 +1,15 @@
 :root {
-  --bg: #f3f6f4; --card: #ffffff; --ink: #11231b; --muted: #5d6f66; --line: #dfe7e2;
-  --accent: #0f7a4d; --accent-ink: #ffffff; --gold: #c98a00;
-  --best: #0f7a4d; --good: #3d8b2f; --fair: #b7791f; --skip: #b42318;
-  --pos: #0f7a4d; --neg: #b42318; --chip: #e8efeb; --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #07130e; --card: #0f2119; --ink: #e8f2ec; --muted: #93a89d; --line: #1f3a2d;
-    --accent: #2fbf7c; --accent-ink: #04130c; --gold: #f2b631;
-    --best: #2fbf7c; --good: #7cc35a; --fair: #e0a53a; --skip: #f06b5c;
-    --pos: #2fbf7c; --neg: #f06b5c; --chip: #183126; --shadow: none;
-  }
+  --bg: #0a0806; --card: #15110b; --ink: #f6efe0; --muted: #b3a58a; --line: #3a2f1c;
+  --accent: #e8b53a; --accent-ink: #1a1200; --gold: #f2c14e;
+  --best: #2fbf7c; --good: #8fcf5a; --fair: #e0a53a; --skip: #f06b5c;
+  --pos: #3ed68b; --neg: #ff7a6b; --chip: #231b10; --shadow: 0 0 0 1px rgba(242,193,78,.06), 0 8px 24px rgba(0,0,0,.45);
+  --gold-metal: linear-gradient(180deg, #fff6c8 0%, #ffd766 22%, #c8901c 48%, #ffe08a 62%, #a86f10 82%, #ffd766 100%);
+  --silver-metal: linear-gradient(180deg, #ffffff 0%, #e6e9ee 25%, #9aa2ad 50%, #f4f6f9 68%, #7c8591 88%, #dfe3e8 100%);
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding-bottom: env(safe-area-inset-bottom); }
+body { margin: 0; background: radial-gradient(120% 60% at 50% 0%, #2a1e08 0%, var(--bg) 60%) fixed, var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding-bottom: env(safe-area-inset-bottom); }
 body.loading #refresh { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 a { color: var(--accent); }
@@ -30,8 +25,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: calc(10px + env(safe-area-inset-top)) 16px 10px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .brand { display: flex; gap: 10px; align-items: center; min-width: 0; }
-.brand h1 { font-size: 1.1rem; }
-.brand p { margin: 0; font-size: .78rem; color: var(--muted); }
+.brand-mini { font: 700 1rem Cinzel, Georgia, serif; letter-spacing: .04em; background: var(--gold-metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); font-size: 1.2rem; }
 
 .status { display: flex; gap: 14px; align-items: center; margin: 12px 16px 0; padding: 10px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
@@ -83,7 +77,7 @@ main { max-width: 760px; margin: 0 auto; padding: 0 16px; }
 .score b { font-size: 1.15rem; line-height: 1; }
 .score small { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
 .v-best { background: var(--best); } .v-good { background: var(--good); } .v-fair { background: var(--fair); } .v-skip { background: var(--skip); }
-@media (prefers-color-scheme: dark) { .score { color: #04130c; } }
+.score { color: #07130c; }
 
 .scroller { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
 .new-card { position: relative; flex: 0 0 170px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 3px; text-align: left; border: 1px solid var(--line); border-radius: 14px; padding: 8px; background: var(--bg); }
@@ -142,3 +136,33 @@ tr.gone { opacity: .45; }
 
 footer { max-width: 760px; margin: 20px auto 0; padding: 16px 16px 32px; font-size: .82rem; color: var(--muted); }
 footer b { color: var(--ink); }
+
+/* ---------- Harpstar hero: metallic lettering + dollar burst ---------- */
+.hero { position: relative; overflow: hidden; text-align: center; padding: 34px 16px 22px; isolation: isolate; }
+.title-gold { position: relative; margin: 0; font-family: Cinzel, "Trajan Pro", Georgia, serif; font-weight: 900; text-transform: uppercase;
+  font-size: clamp(2.2rem, 11vw, 4.2rem); line-height: .95; letter-spacing: .03em; display: flex; flex-direction: column; align-items: center; }
+.title-gold span { background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.95) 50%, transparent 62%), var(--gold-metal);
+  background-size: 250% 100%, 100% 100%; animation: shine 3.8s ease-in-out infinite; -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 #5a3a05) drop-shadow(0 0 14px rgba(255,200,80,.35)); position: relative; }
+@keyframes shine { 0% { background-position: 150% 0, 0 0; } 55%, 100% { background-position: -60% 0, 0 0; } }
+.by-silver { margin: 10px 0 0; font: italic 700 clamp(1.1rem, 5vw, 1.6rem) Cinzel, Georgia, serif; letter-spacing: .12em;
+  background: var(--silver-metal); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 #2b2f35) drop-shadow(0 0 10px rgba(220,230,255,.3)); }
+.tagline { margin: 8px 0 0; color: var(--muted); font-size: .9rem; }
+.burst { position: absolute; left: 50%; top: 46%; width: 0; height: 0; z-index: -1; }
+.burst i { position: absolute; left: 0; top: 0; font: 900 var(--s, 22px)/1 Cinzel, Georgia, serif; font-style: normal; opacity: 0;
+  background: var(--m, var(--gold-metal)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 6px rgba(255,210,90,.55)); animation: shoot var(--d, 2.6s) cubic-bezier(.15,.7,.3,1) var(--delay, 0s) infinite; }
+@keyframes shoot {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.3) rotate(0deg); }
+  12% { opacity: 1; }
+  80% { opacity: .9; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.15) rotate(var(--r)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-gold span, .burst i { animation: none; }
+  .burst i { opacity: .5; transform: translate(calc(-50% + var(--x) * .7), calc(-50% + var(--y) * .7)); }
+}
+.pick { border-color: var(--gold); background: linear-gradient(180deg, rgba(242,193,78,.12), rgba(242,193,78,.03)); }
+.card h2 { color: var(--gold); letter-spacing: .02em; }
+.title-gold, .by-silver, .tagline { position: relative; z-index: 1; }
+.tagline { display: inline-block; padding: 3px 12px; border-radius: 999px; background: rgba(10,8,6,.72); }
