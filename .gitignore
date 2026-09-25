@@ -19,3 +19,6 @@ data/*.jsonl
 Thumbs.db
 .vscode/
 .idea/
+
+# App icons are source assets
+!docs/icons/*.png

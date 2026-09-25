@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>WA Scratch Lens</title>
+  <meta name="description" content="Smart rankings for Washington Lottery scratch tickets, updated automatically.">
+  <meta name="theme-color" content="#0b1f17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Scratch Lens">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <img src="icons/icon.svg" alt="" width="36" height="36">
+    <div><h1>WA Scratch Lens</h1><p>Smart picks for Washington scratch tickets</p></div>
+  </div>
+  <button id="refresh" class="icon-btn" aria-label="Refresh now" title="Refresh now">↻</button>
+</header>
+
+<section class="status" id="status" aria-live="polite">
+  <div class="timer">
+    <svg viewBox="0 0 36 36" class="ring" aria-hidden="true"><circle cx="18" cy="18" r="15.5" class="ring-bg"/><circle cx="18" cy="18" r="15.5" class="ring-fg" id="ring-fg"/></svg>
+    <div><small>Next auto-check</small><b id="countdown">--:--</b></div>
+  </div>
+  <div class="status-lines">
+    <span id="source-line">Loading live data…</span>
+    <span id="changed-line"></span>
+  </div>
+</section>
+
+<div id="banner" class="banner" hidden></div>
+
+<main>
+  <section class="card pick-card" id="pick">
+    <form id="budget-form" class="budget">
+      <label for="budget">My budget today</label>
+      <div class="money"><span>$</span><input id="budget" type="number" inputmode="decimal" min="1" max="10000" step="1" value="20"></div>
+      <div class="chips" id="budget-chips">
+        <button type="button" data-b="5">$5</button><button type="button" data-b="10">$10</button><button type="button" data-b="20">$20</button><button type="button" data-b="50">$50</button><button type="button" data-b="100">$100</button>
+      </div>
+    </form>
+    <div id="pick-body"><p class="muted">Crunching the numbers…</p></div>
+  </section>
+
+  <section class="card" id="new-tickets">
+    <div class="head"><h2>🆕 New tickets</h2><button id="notify-btn" class="ghost small" type="button">Alert me</button></div>
+    <div class="scroller" id="new-list"></div>
+  </section>
+
+  <section class="card" id="feed">
+    <div class="head"><h2>What changed</h2></div>
+    <div id="feed-list"></div>
+  </section>
+
+  <section class="card" id="all-games">
+    <div class="head"><h2>All games, ranked</h2><span class="muted small" id="game-count"></span></div>
+    <div class="filters">
+      <div class="chips" id="price-chips"></div>
+      <div class="filter-row">
+        <select id="sort" aria-label="Sort by">
+          <option value="score">Smart Score</option>
+          <option value="rtp">Payback per $1</option>
+          <option value="top">Top-prize odds</option>
+          <option value="cost">Price</option>
+        </select>
+        <label class="check"><input type="checkbox" id="hide-gone" checked> Hide top-prize-gone</label>
+      </div>
+    </div>
+    <div id="game-list" class="game-list"></div>
+  </section>
+
+  <section class="card" id="tracker">
+    <div class="head"><h2>My results</h2><span class="muted small">Saved only on this phone</span></div>
+    <form id="log-form" class="log-form">
+      <select id="log-game" aria-label="Game"></select>
+      <input id="log-spent" type="number" inputmode="decimal" min="0" step="1" placeholder="Spent $" aria-label="Spent">
+      <input id="log-won" type="number" inputmode="decimal" min="0" step="1" placeholder="Won $" aria-label="Won">
+      <button type="submit">Add</button>
+    </form>
+    <div id="log-summary"></div>
+    <div id="log-list"></div>
+  </section>
+
+  <section class="card how">
+    <details>
+      <summary>How the Smart Score works</summary>
+      <p>Every game gets 0–100 from the official WA Lottery prize table:</p>
+      <ul>
+        <li><b>Payback (45%)</b> — estimated cents returned per $1 on the tickets still unsold.</li>
+        <li><b>Drift (30%)</b> — payback now vs. at launch. Positive means big prizes are outlasting small ones.</li>
+        <li><b>Big-prize share (25%)</b> — share of the top 3 prize tiers left vs. share of all winners left.</li>
+        <li>Games with <b>every top prize gone</b> are cut by 45% and marked Skip.</li>
+      </ul>
+      <p><b>Chance to end ahead</b> comes from 3,000 simulated sessions at your budget using the remaining prize odds.</p>
+      <p>Remaining tickets are estimated as <i>overall odds × winning prizes left</i>. The Lottery reports <i>claimed</i> prizes, so a recently won but unclaimed prize can still look available.</p>
+    </details>
+    <details>
+      <summary>Put it on your home screen</summary>
+      <p><b>iPhone:</b> open in Safari → Share → <i>Add to Home Screen</i>.<br><b>Android:</b> Chrome menu ⋮ → <i>Install app</i> / <i>Add to Home screen</i>.</p>
+      <button id="share-btn" class="ghost" type="button">Share this app</button>
+    </details>
+  </section>
+</main>
+
+<dialog id="detail"><div id="detail-body"></div><button class="close" id="detail-close" aria-label="Close">✕</button></dialog>
+
+<footer>
+  <p><b>Scratch tickets lose money on average — every game here pays back less than $1 per $1.</b> The Smart Score finds the better-value games; it cannot predict a winning ticket. Only spend what you're fine losing.</p>
+  <p>Need help? Call or text <a href="tel:18005476133">1-800-547-6133</a> · <a href="https://evergreencpg.org/">Evergreen Council on Problem Gambling</a></p>
+  <p class="muted small">Not affiliated with Washington's Lottery. Data: <a href="https://walottery.com/Scratch/explorer.aspx">walottery.com</a>. Must be 18+.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
