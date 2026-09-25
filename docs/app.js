@@ -388,18 +388,24 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 
 // Scratchtastic theme song: click title or "by Harpstar" to play
 ['#theme-trigger', '#harpstar-trigger'].forEach(id => {
-  $(id)?.addEventListener('click', () => {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
     const audio = $('#theme-audio');
+    if (!audio) return;
     audio.currentTime = 0;
-    audio.play().catch(() => {});
+    const playPromise = audio.play();
+    if (playPromise && playPromise.catch) playPromise.catch(() => console.log('Audio blocked'));
   });
 });
 
 // Jackpot sound: play when big win logged
 window.playJackpot = () => {
   const audio = $('#jackpot-audio');
+  if (!audio) return;
   audio.currentTime = 0;
-  audio.play().catch(() => {});
+  const playPromise = audio.play();
+  if (playPromise && playPromise.catch) playPromise.catch(() => console.log('Audio blocked'));
 };
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
