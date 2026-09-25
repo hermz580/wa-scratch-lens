@@ -5,23 +5,33 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>WA Scratch Lens</title>
   <meta name="description" content="Smart rankings for Washington Lottery scratch tickets, updated automatically.">
-  <meta name="theme-color" content="#0b1f17">
+  <meta name="theme-color" content="#0a0806">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Scratch Lens">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="top">
   <div class="brand">
-    <img src="icons/icon.svg" alt="" width="36" height="36">
-    <div><h1>WA Scratch Lens</h1><p>Smart picks for Washington scratch tickets</p></div>
+    <img src="icons/icon.svg" alt="" width="32" height="32">
+    <span class="brand-mini">Scratch Lens</span>
   </div>
   <button id="refresh" class="icon-btn" aria-label="Refresh now" title="Refresh now">↻</button>
 </header>
+
+<section class="hero" aria-label="WA Scratch Lens by Harpstar">
+  <div class="burst" id="burst" aria-hidden="true"></div>
+  <h1 class="title-gold"><span>WA Scratch</span><span>Lens</span></h1>
+  <p class="by-silver">by Harpstar</p>
+  <p class="tagline">Smart picks for Washington scratch tickets</p>
+</section>
 
 <section class="status" id="status" aria-live="polite">
   <div class="timer">

@@ -1,5 +1,5 @@
 // Offline support: app shell cache-first, game data network-first.
-const SHELL = 'scratch-lens-shell-v1';
+const SHELL = 'scratch-lens-shell-v2';
 const DATA = 'scratch-lens-data';
 const SHELL_FILES = ['./', 'index.html', 'app.js', 'styles.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png'];
 

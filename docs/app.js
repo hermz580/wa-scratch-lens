@@ -280,6 +280,20 @@ $('#share-btn').addEventListener('click', async () => {
 });
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(true); });
 
+// Harpstar hero: dollar signs shooting out of the title
+(function burst() {
+  const box = $('#burst'); if (!box) return;
+  const metals = ['var(--gold-metal)', 'var(--gold-metal)', 'var(--silver-metal)'];
+  for (let i = 0; i < 22; i++) {
+    const a = (i / 22) * Math.PI * 2 + Math.random() * 0.25, dist = 120 + Math.random() * 110;
+    const el = document.createElement('i');
+    el.textContent = '$';
+    el.style.cssText = `--x:${Math.cos(a) * dist * 1.5}px;--y:${Math.sin(a) * dist * 0.75}px;--r:${Math.round(Math.random() * 120 - 60)}deg;` +
+      `--s:${16 + Math.round(Math.random() * 20)}px;--d:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--delay:${(Math.random() * 3).toFixed(2)}s;--m:${metals[i % 3]}`;
+    box.appendChild(el);
+  }
+})();
+
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 load();
 setInterval(tick, 1000);
