@@ -1,7 +1,7 @@
 // Offline support: app shell cache-first, game data network-first.
-const SHELL = 'scratch-lens-shell-v2';
+const SHELL = 'scratch-lens-shell-v3';
 const DATA = 'scratch-lens-data';
-const SHELL_FILES = ['./', 'index.html', 'app.js', 'styles.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png'];
+const SHELL_FILES = ['./', 'index.html', 'app.js', 'slots.js', 'styles.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(SHELL).then(c => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));

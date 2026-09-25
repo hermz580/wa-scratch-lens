@@ -17,7 +17,7 @@ const simCache = new Map();
 // ---------- formatting ----------
 const money = x => x == null ? '—' : new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: x >= 100 ? 0 : 2}).format(x);
 const whole = x => x == null ? '—' : new Intl.NumberFormat('en-US', {maximumFractionDigits: 0}).format(x);
-const pct = x => x == null ? '—' : `${(x * 100).toFixed(x < 0.01 && x > 0 ? 2 : 0)}%`;
+const pct = x => x == null ? '—' : x > 0 && x < 0.0001 ? '<0.01%' : `${(x * 100).toFixed(x < 0.01 && x > 0 ? 2 : 0)}%`;
 const cents = r => `${Math.round(r * 100)}¢`;
 const safe = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 function ago(date) {
@@ -43,7 +43,7 @@ function simulate(g, n) {
   let acc = 0;
   for (const t of tiers) { acc += t.p; cum.push(acc); vals.push(t.value || 0); }
   const spent = n * g.cost, rand = rng(g.id * 7919 + n), totals = new Float64Array(SIM_RUNS);
-  let ahead = 0, even = 0, sum = 0;
+  let ahead = 0, even = 0, sum = 0, nothing = 0, some = 0, big = 0;
   for (let r = 0; r < SIM_RUNS; r++) {
     let won = 0;
     for (let i = 0; i < n; i++) {
@@ -55,14 +55,59 @@ function simulate(g, n) {
     totals[r] = won; sum += won;
     if (won > spent) ahead++;
     if (won >= spent) even++;
+    if (won === 0) nothing++;
+    else if (won < spent) some++;
+    if (won >= spent * 5) big++;
   }
   totals.sort();
   const res = {n, spent, ahead: ahead / SIM_RUNS, even: even / SIM_RUNS, mean: sum / SIM_RUNS,
+    nothing: nothing / SIM_RUNS, some: some / SIM_RUNS, back: (even - ahead) / SIM_RUNS, big: big / SIM_RUNS,
     median: totals[Math.floor(SIM_RUNS / 2)], p10: totals[Math.floor(SIM_RUNS * 0.1)], p90: totals[Math.floor(SIM_RUNS * 0.9)]};
   simCache.set(key, res);
   return res;
 }
 const ticketsFor = (budget, g) => Math.min(SIM_MAX_TICKETS, Math.floor(budget / g.cost));
+
+// ---------- plain-English wins ----------
+const OUTCOMES = [
+  {key: 'nothing', label: 'Win nothing', cls: 'o-nothing', icon: '✖'},
+  {key: 'some', label: 'Win some back, still down', cls: 'o-some', icon: '↘'},
+  {key: 'back', label: 'Get exactly your money back', cls: 'o-back', icon: '＝'},
+  {key: 'ahead', label: 'Come out ahead', cls: 'o-ahead', icon: '$'},
+];
+/** Round shares so the ten people always add up to 10. */
+function outOfTen(sim) {
+  const raw = OUTCOMES.map(o => sim[o.key] * 10), base = raw.map(Math.floor);
+  let left = 10 - base.reduce((a, b) => a + b, 0);
+  raw.map((r, i) => [r - base[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { base[i]++; left--; } });
+  return base;
+}
+function outcomeBlock(sim) {
+  const ten = outOfTen(sim);
+  const people = OUTCOMES.flatMap((o, i) => Array(ten[i]).fill(`<span class="person ${o.cls}" title="${o.label}">${o.icon}</span>`)).join('');
+  const lines = OUTCOMES.map((o, i) => `<li><i class="${o.cls}"></i><span>${o.label}</span><b>${pct(sim[o.key])}</b><small>${ten[i]} of 10</small></li>`).join('');
+  return `
+    <div class="outcomes">
+      <p class="outcome-head">If 10 people each spend <b>${money(sim.spent)}</b> this way:</p>
+      <div class="people" aria-hidden="true">${people}</div>
+      <ul class="outcome-list">${lines}</ul>
+      <p class="fineprint">Big wins (5× your money or more) happen in about ${sim.big ? `1 in ${whole(Math.max(1, 1 / sim.big))}` : 'fewer than 1 in 3,000'} tries. Typical cash back: ${money(sim.median)}. Average cost of playing: <b class="neg">${money(sim.spent - sim.mean)}</b>.</p>
+    </div>`;
+}
+function tierKind(t, g) {
+  if (t === g.tiers[0]) return ['Top prize', 'k-top'];
+  if (t.value == null) return ['Non-cash', 'k-profit'];
+  if (t.value < g.cost) return ['Less than ticket', 'k-less'];
+  if (t.value === g.cost) return ['Money back', 'k-back'];
+  if (t.value >= g.cost * 20) return ['Big win', 'k-big'];
+  return ['Profit', 'k-profit'];
+}
+function winTruth(g) {
+  const all = g.tiers.reduce((a, t) => a + t.p, 0) || 1;
+  const small = g.tiers.filter(t => t.value != null && t.value <= g.cost).reduce((a, t) => a + t.p, 0);
+  const profit = g.tiers.filter(t => t.value == null || t.value > g.cost).reduce((a, t) => a + t.p, 0);
+  return `About <b>1 in ${g.odds.toFixed(1)}</b> tickets is a “winner” — but <b>${pct(small / all)}</b> of those wins only give back your ticket price or less. A win that actually beats the ticket price comes about <b>1 in ${whole(profit ? 1 / profit : null)}</b> tickets.`;
+}
 
 // ---------- rendering ----------
 function scoreBadge(g) { return `<span class="score v-${g.verdict}" title="Smart Score"><b>${g.score}</b><small>${VERDICT[g.verdict]}</small></span>`; }
@@ -118,12 +163,9 @@ function renderPick() {
       ${scoreBadge(best)}
     </button>
     <ul class="reasons">${best.reasons.map(r => `<li>${safe(r)}</li>`).join('')}</ul>
-    <div class="stats">
-      <div><small>Chance to end ahead</small><b>${pct(sim.ahead)}</b></div>
-      <div><small>Typical cash back</small><b>${money(sim.median)}</b></div>
-      <div><small>Average cost of play</small><b class="neg">${money(sim.spent - best.rtp * sim.spent)}</b></div>
-    </div>
-    <p class="fineprint">From ${whole(SIM_RUNS)} simulated sessions of ${n} tickets. 1 in 10 sessions got back ${money(sim.p90)}+; 1 in 10 got ${money(sim.p10)} or less.</p>
+    ${outcomeBlock(sim)}
+    <p class="win-truth">${winTruth(best)}</p>
+    <p class="fineprint">Based on ${whole(SIM_RUNS)} simulated sessions of ${n} tickets using the prizes still left. A lucky 1 in 10 got back ${money(sim.p90)} or more.</p>
     ${alts.length ? `<p class="eyebrow">Also good at this budget</p><div class="alts">${alts.map(g => `<button class="alt" data-id="${g.id}">${thumb(g)}<span>${safe(g.name)}<small>${money(g.cost)} · ${cents(g.rtp)} per $1</small></span>${scoreBadge(g)}</button>`).join('')}</div>` : ''}`;
 }
 
@@ -185,9 +227,11 @@ function openDetail(id) {
       <div><small>Sells out in</small><b>${g.days_left ? `~${whole(g.days_left)} days` : '—'}</b></div>
     </div>
     <p class="eyebrow">With ${money(n * g.cost)} (${n} ticket${n === 1 ? '' : 's'})</p>
-    <div class="stats"><div><small>End ahead</small><b>${pct(sim.ahead)}</b></div><div><small>Break even+</small><b>${pct(sim.even)}</b></div><div><small>Typical back</small><b>${money(sim.median)}</b></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Prize</th><th>Left</th><th>of</th><th>Odds now</th></tr></thead><tbody>
-      ${g.tiers.map(t => `<tr class="${t.rem ? '' : 'gone'}"><td><b>${safe(t.label)}</b></td><td>${whole(t.rem)}</td><td>${whole(t.total)}</td><td>${t.p ? `1 in ${whole(1 / t.p)}` : 'gone'}</td></tr>`).join('')}
+    ${outcomeBlock(sim)}
+    <p class="win-truth">${winTruth(g)}</p>
+    <p class="eyebrow">Every prize, in plain words</p>
+    <div class="table-wrap"><table class="prize-table"><thead><tr><th>Prize</th><th>Odds</th><th>Your chance</th></tr></thead><tbody>
+      ${g.tiers.map(t => { const [kind, cls] = tierKind(t, g); return `<tr class="${t.rem ? '' : 'gone'}"><td><b>${safe(t.label)}</b> <span class="kind ${cls}">${kind}</span><small class="left">${whole(t.rem)} of ${whole(t.total)} left</small></td><td>${t.p ? `1 in ${whole(1 / t.p)}` : 'gone'}</td><td>${t.p ? pct(1 - Math.pow(1 - t.p, n)) : '0%'}</td></tr>`; }).join('')}
     </tbody></table></div>
     <p class="fineprint">“Left” = not yet claimed. WA data updated ${safe(sourceLabel(g.source_updated))}.</p>`;
   $('#detail').showModal();
@@ -283,13 +327,14 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 // Harpstar hero: dollar signs shooting out of the title
 (function burst() {
   const box = $('#burst'); if (!box) return;
-  const metals = ['var(--gold-metal)', 'var(--gold-metal)', 'var(--silver-metal)'];
-  for (let i = 0; i < 22; i++) {
-    const a = (i / 22) * Math.PI * 2 + Math.random() * 0.25, dist = 120 + Math.random() * 110;
+  const colors = ['#ffd766', '#f2b631', '#fff1b8', '#e6e9ee', '#c9ced6'];
+  const count = 28;
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2 + Math.random() * 0.25, dist = 120 + Math.random() * 120;
     const el = document.createElement('i');
     el.textContent = '$';
     el.style.cssText = `--x:${Math.cos(a) * dist * 1.5}px;--y:${Math.sin(a) * dist * 0.75}px;--r:${Math.round(Math.random() * 120 - 60)}deg;` +
-      `--s:${16 + Math.round(Math.random() * 20)}px;--d:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--delay:${(Math.random() * 3).toFixed(2)}s;--m:${metals[i % 3]}`;
+      `--s:${18 + Math.round(Math.random() * 22)}px;--d:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--delay:${(-Math.random() * 3).toFixed(2)}s;--c:${colors[i % colors.length]}`;
     box.appendChild(el);
   }
 })();

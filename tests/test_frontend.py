@@ -27,6 +27,25 @@ class FrontendTests(unittest.TestCase):
         for element_id in ids:
             self.assertIn(f'id="{element_id}"', html, element_id)
 
+    def test_slot_machine_is_wired_and_free(self):
+        html = (DOCS / "index.html").read_text(encoding="utf-8")
+        slots = (DOCS / "slots.js").read_text(encoding="utf-8")
+        self.assertIn('src="slots.js"', html)
+        for element_id in set(re.findall(r"el\('([\w-]+)'\)", slots)):
+            self.assertIn(f'id="{element_id}"', html, element_id)
+        self.assertIn("fun coins have no value", html)
+        self.assertIn("slots.js", (DOCS / "sw.js").read_text(encoding="utf-8"))
+
+    def test_hero_has_harpstar_branding_and_burst(self):
+        html = (DOCS / "index.html").read_text(encoding="utf-8")
+        css = (DOCS / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("by Harpstar", html)
+        self.assertIn('id="burst"', html)
+        burst_rule = re.search(r"\.burst i \{([^}]*)\}", css).group(1)
+        # iOS Safari hides background-clip:text glyphs that also use filter.
+        self.assertNotIn("background-clip", burst_rule)
+        self.assertNotIn("filter", burst_rule)
+
     def test_manifest_icons_exist(self):
         manifest = json.loads((DOCS / "manifest.webmanifest").read_text(encoding="utf-8"))
         for icon in manifest["icons"]:

@@ -28,8 +28,8 @@
 
 <section class="hero" aria-label="WA Scratch Lens by Harpstar">
   <div class="burst" id="burst" aria-hidden="true"></div>
-  <h1 class="title-gold"><span>WA Scratch</span><span>Lens</span></h1>
-  <p class="by-silver">by Harpstar</p>
+  <h1 class="title-gold"><span data-text="WA Scratch">WA Scratch</span><span data-text="Lens">Lens</span></h1>
+  <p class="by-silver"><span data-text="by Harpstar">by Harpstar</span></p>
   <p class="tagline">Smart picks for Washington scratch tickets</p>
 </section>
 
@@ -118,6 +118,40 @@
   </section>
 </main>
 
+<button id="slots-fab" class="slots-fab" type="button" aria-controls="slots" aria-expanded="false">🎰 <span>Free Slots</span></button>
+<aside id="slots" class="slots" aria-label="Harpstar free slots">
+  <div class="slots-head">
+    <div><b class="slots-title">Harpstar Slots</b><small>Free play · fun coins have no value</small></div>
+    <button id="slots-close" class="icon-btn small-btn" type="button" aria-label="Close slots">✕</button>
+  </div>
+  <div class="machine">
+    <div class="reels">
+      <div class="reel"><div class="reel-strip"></div></div>
+      <div class="reel"><div class="reel-strip"></div></div>
+      <div class="reel"><div class="reel-strip"></div></div>
+      <div class="payline" aria-hidden="true"></div>
+    </div>
+    <p id="slot-msg" class="slot-msg" aria-live="polite"></p>
+    <div class="slot-controls">
+      <div class="chips bet-chips"><span>Bet</span><button type="button" data-bet="1">1</button><button type="button" data-bet="5">5</button><button type="button" data-bet="10">10</button></div>
+      <button id="slot-spin" class="spin-btn" type="button">SPIN</button>
+      <button id="slot-refill" class="ghost" type="button" hidden>Refill 100 free coins</button>
+    </div>
+    <div class="slot-stats">
+      <div><small>Fun coins</small><b id="slot-coins">100</b></div>
+      <div><small>Bet</small><b id="slot-bet">1</b></div>
+      <div><small>Spins</small><b id="slot-spins">0</b></div>
+      <div><small>Your payback</small><b id="slot-payback">—</b></div>
+      <div><small>Best win</small><b id="slot-best">0</b></div>
+    </div>
+    <details class="paytable"><summary>Pays &amp; the truth about slots</summary>
+      <ul id="slot-paytable"></ul>
+      <p>This machine is built to pay back <b id="slot-rtp">86%</b> over time, like real slots. Watch “Your payback” — a hot streak can top 100%, but the more you spin, the closer it slides to the house number. Same lesson as scratch tickets.</p>
+      <button id="slot-reset" class="ghost small" type="button">Reset stats</button>
+    </details>
+  </div>
+</aside>
+
 <dialog id="detail"><div id="detail-body"></div><button class="close" id="detail-close" aria-label="Close">✕</button></dialog>
 
 <footer>
@@ -126,5 +160,6 @@
   <p class="muted small">Not affiliated with Washington's Lottery. Data: <a href="https://walottery.com/Scratch/explorer.aspx">walottery.com</a>. Must be 18+.</p>
 </footer>
 <script src="app.js"></script>
+<script src="slots.js"></script>
 </body>
 </html>
