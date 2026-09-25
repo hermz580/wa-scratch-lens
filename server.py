@@ -10,12 +10,12 @@ from urllib.parse import parse_qs, urlparse
 
 from alerts import load_snapshot, save_snapshot
 from agent_pipeline import AgentPipeline
+import site_builder
 
 ROOT = Path(__file__).parent
-STATIC = ROOT / "static"
+STATIC = ROOT / "docs"
 SNAPSHOT = ROOT / "data" / "snapshot.json"
-HISTORY = ROOT / "data" / "watch-history.jsonl"
-WATCH_INTERVAL_SECONDS = 15 * 60
+WATCH_INTERVAL_SECONDS = 30 * 60
 PORT = 8879
 
 
@@ -41,17 +41,11 @@ def build_payload(budget: float):
 
 
 def watch_forever():
+    """Refresh docs/data (the phone app's data files) on the same cadence as the hosted robot."""
     while True:
         try:
-            payload = build_payload(20.0)
-            leaders = payload["jackpot_watchlist"][:10]
-            record = {"checked_at": payload["checked_at"], "leaders": [{
-                "id": g["id"], "name": g["name"], "top_prize": g["top_prize_label"],
-                "remaining": g["top_prizes_remaining"], "one_in": g["top_prize_one_in"],
-                "ticket_cost": g["cost"]} for g in leaders]}
-            HISTORY.parent.mkdir(parents=True, exist_ok=True)
-            with HISTORY.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(record) + "\n")
+            if site_builder.run():
+                print("Lottery data changed; app data refreshed")
         except Exception as exc:
             print(f"Watcher cycle failed: {exc}")
         time.sleep(WATCH_INTERVAL_SECONDS)
