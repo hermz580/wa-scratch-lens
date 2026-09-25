@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WA Scratch Lens</title><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><div><p class="eyebrow">WASHINGTON SCRATCH-TICKET ANALYSIS</p><h1>WA Scratch Lens</h1><p class="lede">Compare published games by your budget. Rankings are estimates—not predictions.</p></div><div class="source" id="source-status">Loading live data…</div></header>
+<main>
+  <section class="control-panel" aria-labelledby="budget-title">
+    <div><h2 id="budget-title">Set your entertainment budget</h2><p>We calculate how many tickets fit and estimate the chance of at least one listed prize.</p></div>
+    <form id="budget-form"><label for="budget">Budget</label><div class="money-input"><span>$</span><input id="budget" name="budget" type="number" min="0" max="100000" step="1" value="20" inputmode="decimal"></div><button type="submit">Analyze games</button></form>
+  </section>
+  <div id="message" role="status" aria-live="polite"></div>
+  <section class="rankings" aria-label="Best games by metric">
+    <article class="hero-card green" id="best-any"><span class="tag">BEST ANY-PRIZE CHANCE</span><div class="card-content"></div></article>
+    <article class="hero-card amber" id="best-ev"><span class="tag">HIGHEST ESTIMATED RETURN RATE</span><div class="card-content"></div></article>
+    <article class="hero-card violet" id="best-top"><span class="tag">EASIEST REMAINING TOP TIER</span><div class="card-content"></div></article>
+  </section>
+  <section class="lab" id="agent-operations">
+    <div class="section-head"><div><p class="eyebrow">MULTI-AGENT CONTROL ROOM</p><h2>Agent operations</h2><p class="muted">These are independently scheduled worker jobs with separate timing, output, and failure boundaries—not decorative labels.</p></div><div id="run-verdict" class="pill open">Waiting for verified run</div></div>
+    <div class="operations-grid" id="operations-grid"></div>
+    <details class="audit"><summary>Audit trail</summary><div id="audit-trail"></div></details>
+  </section>
+  <section class="lab" id="prize-board">
+    <div class="section-head"><div><p class="eyebrow">OFFICIAL PRIZE BOARD</p><h2>Every prize amount: printed, paid, and remaining</h2><p class="muted">Mirrors Washington Lottery’s published prize table, then adds transparent estimated odds for your selected budget.</p></div><label for="prize-game">Game<select id="prize-game"></select></label></div>
+    <div id="prize-summary" class="prize-summary"></div>
+    <div class="table-wrap"><table><thead><tr><th>Prize</th><th>Total printed</th><th>Paid / claimed</th><th>Reported remaining</th><th>% remaining</th><th>Est. odds per ticket</th><th>Chance with budget</th><th>EV contribution</th></tr></thead><tbody id="prize-tier-rows"></tbody></table></div>
+    <p class="tiny">“Reported remaining” may mean unclaimed, not necessarily unsold. Estimated odds assume winning and losing tickets deplete proportionally; they cannot locate a winning ticket.</p>
+  </section>
+  <section class="lab" id="jackpot-watch">
+    <div class="section-head"><div><p class="eyebrow">JACKPOT WATCH AGENT</p><h2>Highest possible payouts across every open game</h2><p class="muted">Ranked by advertised top-prize amount. “Expected spend” means cost ÷ estimated per-ticket probability—not a required or guaranteed spend.</p></div><span class="pill open">Checks every 15 minutes while service runs</span></div>
+    <div class="table-wrap"><table class="watch-table"><thead><tr><th>Game / top prize</th><th>Ticket</th><th>Top prizes left</th><th>Estimated odds</th><th>Expected spend*</th><th>Spend for 1%</th><th>Spend for 5%</th><th>Spend for 50%</th></tr></thead><tbody id="jackpot-rows"></tbody></table></div>
+  </section>
+  <section class="lab" id="probability-lab">
+    <div class="section-head"><div><p class="eyebrow">PROBABILITY LAB</p><h2>What the budget outcome really looks like</h2><p class="muted">For the current best any-prize game: zero prizes, exactly one, multiple prizes, expected count, and payout spread.</p></div></div>
+    <div class="stat-grid" id="deep-stats"></div>
+  </section>
+  <section class="lab" id="strategy-plans">
+    <div class="section-head"><div><p class="eyebrow">PORTFOLIO AGENT</p><h2>Best way to allocate this budget</h2><p class="muted">These plans optimize one mathematical target at a time. They do not improve the lottery’s underlying return.</p></div></div>
+    <div class="plan-grid" id="plan-grid"></div>
+  </section>
+  <section class="alerts-panel" id="alerts"><div><p class="eyebrow">WATCH AGENT</p><h2>Data-change alerts</h2><label class="toggle"><input id="alerts-toggle" type="checkbox" checked> Check every 15 minutes while this page is open</label></div><div id="alert-list"><p class="muted">No changes detected since the previous check.</p></div></section>
+  <section class="table-section"><div class="section-head"><div><p class="eyebrow">ANALYSIS AGENT</p><h2>All active games</h2></div><div class="legend"><span><i class="dot green-dot"></i>stronger</span><span><i class="dot amber-dot"></i>middle</span><span><i class="dot red-dot"></i>weaker</span></div></div><div class="table-wrap"><table><thead><tr><th>Game</th><th>Price / tickets</th><th>Any prize</th><th>Prize above ticket cost</th><th>Est. return</th><th>Top prize</th><th>Status</th></tr></thead><tbody id="game-rows"></tbody></table></div></section>
+  <details><summary>How the estimates work</summary><p><b>Any prize:</b> uses the published overall odds. <b>Top-prize and payout estimates:</b> estimate remaining tickets as overall-odds denominator × all reported remaining prizes. This assumes winning and losing tickets deplete proportionally and claims track sales. It does not reveal retailer inventory or ticket location.</p><p>Non-cash prizes without a supported dollar value are excluded from payout rankings rather than counted as $0.</p></details>
+</main>
+<footer><p><b>No result guarantees a win or profit.</b> “Any prize” can include break-even prizes. Estimates use published prize counts and assumptions; lottery outcomes are random. Spend only what you can afford to lose.</p><p>Washington help: call or text <a href="tel:18005476133">1-800-547-6133</a> · <a href="https://evergreencpg.org/">Evergreen Council on Problem Gambling</a> · <a href="https://walottery.com/Responsibility/">Responsible Play</a></p></footer>
+<script src="app.js"></script>
+</body></html>

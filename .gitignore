@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Runtime state regenerated from the public WA Lottery source
+data/*.json
+data/*.jsonl
+
+# Local verification captures
+*.png
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
