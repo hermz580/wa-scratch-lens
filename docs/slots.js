@@ -7,11 +7,14 @@
   if (!panel) return;
 
   const START_COINS = 100, KEY = 'fun-slots';
+  const REFERRAL_CODES = {
+    'HARPSTAR50': 50, 'SCRATCHY100': 100, 'LUCKY25': 25, 'WINNING200': 200, 'BIGWIN75': 75,
+  };
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { } };
 
   const state = Object.assign({
-    coins: START_COINS, bet: 1, spins: 0, in: 0, out: 0, best: 0, gameType: 'classic'
+    coins: START_COINS, bet: 1, spins: 0, in: 0, out: 0, best: 0, gameType: 'classic', usedReferrals: {}
   }, load() || {});
 
   // Game definitions: symbols, weights, payouts
@@ -207,6 +210,23 @@
       `<p>This game pays <b>${Math.round(rtp * 100)}%</b> on average. Bet amounts scale by game (${currentGame.name} = ${currentGame.betMultiplier}× multiplier).</p>`;
   }
 
+  function claimReferral() {
+    const code = el('referral-code').value.toUpperCase().trim();
+    const msg = el('referral-msg');
+    if (!code) { msg.textContent = 'Enter a code'; msg.className = 'referral-msg muted small error'; return; }
+    if (state.usedReferrals[code]) { msg.textContent = 'Code already used'; msg.className = 'referral-msg muted small error'; return; }
+    if (!REFERRAL_CODES[code]) { msg.textContent = 'Invalid code'; msg.className = 'referral-msg muted small error'; return; }
+    const bonus = REFERRAL_CODES[code];
+    state.coins += bonus;
+    state.usedReferrals[code] = true;
+    save();
+    render();
+    el('referral-code').value = '';
+    msg.textContent = `✨ Bonus +${bonus} coins! (${el('slot-coins').textContent} total)`;
+    msg.className = 'referral-msg muted small success';
+    setTimeout(() => { msg.textContent = ''; msg.className = 'referral-msg muted small'; }, 4000);
+  }
+
   // Event listeners
   panel.addEventListener('click', e => {
     const bet = e.target.closest('[data-bet]');
@@ -217,9 +237,11 @@
   });
 
   el('slot-spin').addEventListener('click', spin);
+  el('referral-btn').addEventListener('click', claimReferral);
+  el('referral-code').addEventListener('keydown', e => { if (e.key === 'Enter') claimReferral(); });
   el('slot-refill').addEventListener('click', () => { state.coins = START_COINS; save(); render('Refilled 100 free coins.'); });
   el('slot-reset').addEventListener('click', () => {
-    Object.assign(state, {coins: START_COINS, spins: 0, in: 0, out: 0, best: 0});
+    Object.assign(state, {coins: START_COINS, spins: 0, in: 0, out: 0, best: 0, usedReferrals: {}});
     save();
     render('Stats reset.');
   });

@@ -214,6 +214,17 @@ footer b { color: var(--ink); }
 .game-btn { padding: 6px 12px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; font-size: .85rem; color: var(--muted); cursor: pointer; transition: all 200ms; }
 .game-btn:hover { background: color-mix(in srgb, var(--accent) 15%, var(--card)); }
 .game-btn.on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+
+.referral-box { padding: 10px 10px 0; }
+.referral-input { display: flex; gap: 6px; margin-bottom: 8px; }
+.referral-input input { flex: 1; padding: 6px 10px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; font-size: .85rem; color: var(--ink); }
+.referral-input input::placeholder { color: var(--muted); }
+.referral-input button { padding: 6px 12px; border: 1px solid var(--line); background: var(--card); border-radius: 8px; font-size: .85rem; cursor: pointer; transition: all 200ms; }
+.referral-input button:hover:not(:disabled) { background: color-mix(in srgb, var(--pos) 15%, var(--card)); border-color: var(--pos); }
+.referral-input button:disabled { opacity: 0.5; cursor: not-allowed; }
+.referral-msg { margin: 0; padding: 6px 10px; border-radius: 6px; }
+.referral-msg.success { background: rgba(63,191,124,.1); color: var(--pos); }
+.referral-msg.error { background: rgba(255,122,107,.1); color: var(--neg); }
 .machine { max-width: 360px; margin: 0 auto; }
 .reels { position: relative; display: grid; gap: 8px; padding: 10px; border-radius: 16px; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
   background: #050403; border: 3px solid #c8901c; box-shadow: inset 0 0 18px rgba(0,0,0,.9), 0 0 0 2px #5a3a05, 0 0 20px rgba(242,193,78,.25); }
