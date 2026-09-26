@@ -353,18 +353,46 @@ function renderOdds() {
   const gameId = $('#odds-game').value;
   const game = gameId ? data?.games.find(g => String(g.id) === gameId) : null;
   const html = [];
+
   if (game) {
-    const tickets = Math.floor(budget / game.cost);
-    const chanceAny = (1 - Math.pow(1 - game.p_any, tickets)) * 100;
-    const chanceProfit = (1 - Math.pow(1 - game.p_profit, tickets)) * 100;
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Your tickets</div><div class="odds-stat-value">${tickets}</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to win anything</div><div class="odds-stat-value">${chanceAny.toFixed(0)}%</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to come out ahead</div><div class="odds-stat-value">${chanceProfit.toFixed(0)}%</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">You'll get back (on average)</div><div class="odds-stat-value">$${(budget * game.rtp).toFixed(0)}</div></div>`);
+    const n = ticketsFor(budget, game);
+    const sim = simulate(game, n);
+    const chanceAny = (1 - Math.pow(1 - game.p_any, n)) * 100;
+    const chanceProfit = (1 - Math.pow(1 - game.p_profit, n)) * 100;
+
+    // Quick stats row
+    html.push(`<div class="odds-row">`);
+    html.push(`  <div class="odds-stat"><div class="odds-stat-label">Your tickets</div><div class="odds-stat-value">${n}</div></div>`);
+    html.push(`  <div class="odds-stat"><div class="odds-stat-label">Win anything</div><div class="odds-stat-value">${chanceAny.toFixed(0)}%</div></div>`);
+    html.push(`  <div class="odds-stat"><div class="odds-stat-label">Come ahead</div><div class="odds-stat-value">${chanceProfit.toFixed(0)}%</div></div>`);
+    html.push(`</div>`);
+
+    // Outcome breakdown (from simulation)
+    const outcomes = OUTCOMES.map((o, i) => `<li><i class="${o.cls}"></i><span>${o.label}</span><b>${pct(sim[o.key])}</b></li>`).join('');
+    html.push(`<div class="odds-deep-dive">`);
+    html.push(`  <h3>What happens in 100 similar spends:</h3>`);
+    html.push(`  <ul class="outcome-list">${outcomes}</ul>`);
+    html.push(`</div>`);
+
+    // Win distribution detail
+    html.push(`<div class="odds-detail">`);
+    html.push(`  <div class="detail-row"><span>Expected winnings</span><b>${money(sim.mean)}</b><small class="muted">(average)</small></div>`);
+    html.push(`  <div class="detail-row"><span>Typical outcome</span><b>${money(sim.median)}</b><small class="muted">(median win)</small></div>`);
+    html.push(`  <div class="detail-row"><span>Best 10% get</span><b>${money(sim.p90)}</b><small class="muted">(90th percentile)</small></div>`);
+    html.push(`  <div class="detail-row"><span>House edge cost</span><b class="neg">-${money(sim.spent - sim.mean)}</b><small class="muted">typical loss</small></div>`);
+    html.push(`  <div class="detail-row"><span>Big win odds</span><b>${sim.big ? pct(sim.big) : '&lt;1%'}</b><small class="muted">(5× or more)</small></div>`);
+    html.push(`</div>`);
+
   } else if (data?.games.length) {
-    const avg_win = (data.games.reduce((a, g) => a + (1 - Math.pow(1 - g.p_any, 1)), 0) / data.games.length * 100);
-    html.push(`<p class="muted small">Pick a game to see your odds:</p>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Across all games: 1 ticket wins</div><div class="odds-stat-value">${avg_win.toFixed(0)}% of the time</div></div>`);
+    const topGames = [...data.games].sort((a, b) => b.rtp - a.rtp).slice(0, 3);
+    html.push(`<p class="muted small"><b>Pick a game above ↑</b></p>`);
+    html.push(`<p class="muted small">Or browse the top 3 by expected return:</p>`);
+    html.push(`<div class="odds-top">`);
+    topGames.forEach(g => {
+      const p = pct(1 - Math.pow(1 - g.p_any, 1));
+      html.push(`<div class="top-game" onclick="$('#odds-game').value='${g.id}'; renderOdds();"><b>${g.name}</b><small>${money(g.cost)} · ${p} win rate</small></div>`);
+    });
+    html.push(`</div>`);
   }
   $('#odds-result').innerHTML = html.join('');
 }
