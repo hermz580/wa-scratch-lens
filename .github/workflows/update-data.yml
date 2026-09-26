@@ -1,14 +1,16 @@
 name: Update lottery data
 
 # The robot: checks walottery.com every 15 minutes and publishes fresh
-# rankings to the phone app. Commits only when the lottery data changed.
+# rankings to the phone app. Commits only when the lottery data changed,
+# then deploys docs/ to GitHub Pages from that same fresh checkout.
+# Settings -> Pages -> Source must be "GitHub Actions".
 on:
   schedule:
     - cron: "7,22,37,52 * * * *" # keep in sync with CHECK_MINUTES in site_builder.py
-  workflow_dispatch:
+  workflow_dispatch: # manual runs always redeploy, even with no data change
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: update-data
@@ -16,23 +18,53 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # pinned; ubuntu-latest moves to 26 on 2026-10-19
     timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.publish.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Fetch and score games
         run: python site_builder.py
-      - name: Publish if changed
+      - name: Commit if changed
+        id: publish
         run: |
-          if git diff --quiet -- docs/data; then
+          # git status (not git diff) so brand-new data files count as changes
+          if [ -z "$(git status --porcelain -- docs/data)" ]; then
             echo "No change in WA Lottery data"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "scratch-lens-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/data
           git commit -m "Update WA scratch data $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      # Upload from THIS job, after the commit, so Pages never gets the old snapshot
+      - name: Upload Pages artifact
+        if: steps.publish.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./docs
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04 # pinned; ubuntu-latest moves to 26 on 2026-10-19
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
