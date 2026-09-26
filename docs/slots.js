@@ -82,10 +82,30 @@
       panel.classList.remove('win', 'jackpot');
       if (won) {
         panel.getBoundingClientRect();
-        panel.classList.add(payout(line) >= 50 ? 'jackpot' : 'win');
-        render(payout(line) >= 50 ? `💰 BIG WIN! +${won} fun coins` : `Winner! +${won} fun coins`, 'good');
-      } else render(state.coins < 1 ? 'Out of fun coins — tap Refill (it\'s free).' : 'No win this time.');
+        const isBig = payout(line) >= 50;
+        panel.classList.add(isBig ? 'jackpot' : 'win');
+        const msg = isBig ? `💰 BIG WIN! +${won} coins!` : `✨ Winner! +${won} coins`;
+        render(msg, 'good');
+        if (isBig) launchConfetti();
+      } else render(state.coins < 1 ? '🪙 Refill for 100 free coins — tap the button!' : 'Keep spinning…');
     });
+  }
+
+  function launchConfetti() {
+    const symbols = ['💰', '⭐', '💎', '🎉', '✨'];
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        c.style.left = Math.random() * 100 + '%';
+        c.style.top = -20 + 'px';
+        c.style.animation = `confetti-fall ${1.5 + Math.random() * 1}s ease-out forwards`;
+        c.style.setProperty('--delay', Math.random() * 0.2 + 's');
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3500);
+      }, i * 30);
+    }
   }
 
   panel.addEventListener('click', e => {
@@ -103,8 +123,8 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
 
   el('slot-rtp').textContent = `${Math.round(PAYBACK * 100)}%`;
-  el('slot-paytable').innerHTML = [...SYMBOLS].reverse().map(x => `<li><span>${x.s}${x.s}${x.s}</span><b>×${x.pays}</b></li>`).join('') +
-    '<li><span>🍒🍒 any</span><b>×2</b></li><li><span>🍒 first reel</span><b>×1</b></li>';
+  el('slot-paytable').innerHTML = [...SYMBOLS].reverse().map(x => `<li><span>${x.s}${x.s}${x.s}</span><b>wins ${x.pays}×</b></li>`).join('') +
+    '<li><span>🍒🍒 any</span><b>wins 2×</b></li><li><span>🍒 first</span><b>wins 1×</b></li>';
   reels.forEach(strip => fill(strip, [pick()]));
-  render('Free to play. Fun coins can\'t be bought or cashed out.');
+  render('Free play. Coins never cost real money.');
 })();

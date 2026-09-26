@@ -237,6 +237,12 @@ footer b { color: var(--ink); }
 .slots.win .reels { animation: winflash .5s ease 3; }
 .slots.jackpot .reels { animation: winflash .35s ease 8; }
 @keyframes winflash { 50% { box-shadow: inset 0 0 18px rgba(0,0,0,.9), 0 0 0 2px #ffd766, 0 0 40px rgba(255,215,102,.9); } }
+@keyframes winspin { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes jackpotbounce { 0%, 100% { transform: scale(1) rotateZ(0deg); } 25% { transform: scale(1.12) rotateZ(-2deg); } 50% { transform: scale(1.15) rotateZ(2deg); } 75% { transform: scale(1.12) rotateZ(-1deg); } }
+@keyframes confetti-fall { to { transform: translateY(300px) rotateZ(360deg); opacity: 0; } }
+.confetti { position: fixed; pointer-events: none; font-size: 20px; will-change: transform; }
+.slots.win .reels { animation: winspin .3s ease 2; }
+.slots.jackpot .reels { animation: jackpotbounce .4s ease 1; }
 @media (min-width: 1180px) {
   body { padding-right: 372px; }
   .slots-fab { display: none; }
@@ -246,6 +252,16 @@ footer b { color: var(--ink); }
 }
 @media (prefers-reduced-motion: reduce) { .slots { transition: none; } .slots.win .reels, .slots.jackpot .reels { animation: none; } }
 body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+
+/* ---------- Odds explorer ---------- */
+.odds-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.odds-form label { font-size: .9rem; color: var(--muted); }
+.odds-form .money { margin-bottom: 8px; }
+.odds-form select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--gold); background: #1a1200; color: #ffd766; font-size: .9rem; }
+.odds-result { display: grid; gap: 8px; }
+.odds-stat { background: rgba(255,215,102,.06); border-left: 3px solid var(--gold); padding: 10px 12px; border-radius: 8px; }
+.odds-stat-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.odds-stat-value { font-size: 1.2rem; font-weight: 700; color: #ffd766; margin-top: 4px; }
 
 /* ---------- did you win? ---------- */
 .win-box { border-color: rgba(242,193,78,.45); background: linear-gradient(180deg, rgba(242,193,78,.08), var(--card) 60%); }
