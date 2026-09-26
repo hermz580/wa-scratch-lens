@@ -99,6 +99,7 @@
     reels = [...panel.querySelectorAll('.reel-strip')];
     if (reels.length !== currentGame.reels) {
       const reelContainer = panel.querySelector('.reels');
+      reelContainer.style.setProperty('--reels', currentGame.reels);
       reelContainer.innerHTML = '';
       for (let i = 0; i < currentGame.reels; i++) {
         const reel = document.createElement('div');
@@ -252,6 +253,8 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
 
   // Initialize
+  const reelContainer = panel.querySelector('.reels');
+  reelContainer.style.setProperty('--reels', currentGame.reels);
   updateReels();
   updateGameUI();
   render('Pick a game and spin!');
