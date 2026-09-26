@@ -61,6 +61,16 @@
     <div id="pick-body"><p class="muted">Crunching the numbers…</p></div>
   </section>
 
+  <section class="card" id="odds-explorer">
+    <div class="head"><h2>🎯 Your odds</h2></div>
+    <form id="odds-form" class="odds-form">
+      <label for="odds-budget">If you spend</label>
+      <div class="money"><span>$</span><input id="odds-budget" type="number" inputmode="decimal" min="1" max="10000" step="1" value="20"></div>
+      <select id="odds-game" aria-label="Pick a game"><option value="">— Any game —</option></select>
+    </form>
+    <div id="odds-result" class="odds-result"></div>
+  </section>
+
   <section class="card" id="new-tickets">
     <div class="head"><h2>🆕 New tickets</h2><button id="notify-btn" class="ghost small" type="button">Alert me</button></div>
     <div class="scroller" id="new-list"></div>

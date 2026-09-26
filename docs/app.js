@@ -278,6 +278,10 @@ function renderWinBox() {
   $('#win-game').innerHTML = '<option value="">Which game?</option>' + [...data.games].sort((a, b) => a.name.localeCompare(b.name)).map(g => `<option value="${g.id}">${safe(g.name)} (${money(g.cost)})</option>`).join('');
   $('#win-game').value = current;
   $('#win-email').hidden = !WIN_EMAIL;
+  const oddsCurrent = $('#odds-game').value;
+  $('#odds-game').innerHTML = '<option value="">— Any game —</option>' + [...data.games].sort((a, b) => a.name.localeCompare(b.name)).map(g => `<option value="${g.id}">${safe(g.name)} ($${g.cost})</option>`).join('');
+  $('#odds-game').value = oddsCurrent;
+  renderOdds();
 }
 $('#win-form').addEventListener('submit', e => {
   e.preventDefault();
@@ -338,6 +342,29 @@ $('#budget-form').addEventListener('submit', e => { e.preventDefault(); if (data
 let budgetTimer;
 $('#budget').addEventListener('input', () => { clearTimeout(budgetTimer); budgetTimer = setTimeout(() => data && renderPick(), 250); });
 $('#budget-chips').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (b && data) { $('#budget').value = b.dataset.b; renderPick(); } });
+// Odds explorer
+function renderOdds() {
+  const budget = Number($('#odds-budget').value) || 20;
+  const gameId = $('#odds-game').value;
+  const game = gameId ? data?.games.find(g => String(g.id) === gameId) : null;
+  const html = [];
+  if (game) {
+    const tickets = Math.floor(budget / game.cost);
+    const chanceAny = (1 - Math.pow(1 - game.p_any, tickets)) * 100;
+    const chanceProfit = (1 - Math.pow(1 - game.p_profit, tickets)) * 100;
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Tickets you can buy</div><div class="odds-stat-value">${tickets} × $${game.cost}</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to win something</div><div class="odds-stat-value">${chanceAny.toFixed(0)}%</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to make a profit</div><div class="odds-stat-value">${chanceProfit.toFixed(0)}%</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Expected to get back</div><div class="odds-stat-value">$${(budget * game.rtp).toFixed(0)}</div></div>`);
+  } else if (data?.games.length) {
+    const avg_win = (data.games.reduce((a, g) => a + (1 - Math.pow(1 - g.p_any, 1)), 0) / data.games.length * 100);
+    html.push(`<p class="muted small">Pick a game above to see your odds, or:</p>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Average: chance to win on 1 ticket</div><div class="odds-stat-value">${avg_win.toFixed(0)}%</div></div>`);
+  }
+  $('#odds-result').innerHTML = html.join('');
+}
+$('#odds-form').addEventListener('change', renderOdds);
+$('#odds-budget').addEventListener('input', () => { clearTimeout(budgetTimer); budgetTimer = setTimeout(renderOdds, 250); });
 $('#price-chips').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) { priceFilter = b.dataset.p; renderList(); } });
 $('#sort').addEventListener('change', renderList);
 $('#hide-gone').addEventListener('change', renderList);
