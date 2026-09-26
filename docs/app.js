@@ -112,7 +112,7 @@ function winTruth(g) {
 }
 
 // ---------- rendering ----------
-function scoreBadge(g) { return `<span class="score v-${g.verdict}" title="Smart Score"><b>${g.score}</b><small>${VERDICT[g.verdict]}</small></span>`; }
+function scoreBadge(g) { return `<span class="score v-${g.verdict}" title="Value Rating"><b>${g.score}</b><small>${VERDICT[g.verdict]}</small></span>`; }
 function thumb(g) { return `<img class="thumb" src="${safe(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`; }
 
 // The scheduled robot (GitHub Action) only commits when WA's numbers change,
@@ -182,7 +182,7 @@ function renderPick() {
   const n = ticketsFor(b, best), sim = simulate(best, n);
   const alts = pool.filter(g => g.id !== best.id).slice(0, 3);
   $('#pick-body').innerHTML = `
-    <p class="eyebrow">Smart pick for ${money(b)}</p>
+    <p class="eyebrow">Best pick for ${money(b)}</p>
     <button class="pick" data-id="${best.id}">
       ${thumb(best)}
       <div class="pick-main"><h3>${safe(best.name)}</h3><p>${money(best.cost)} ticket · buy <b>${n}</b></p></div>
@@ -191,8 +191,8 @@ function renderPick() {
     <ul class="reasons">${best.reasons.map(r => `<li>${safe(r)}</li>`).join('')}</ul>
     ${outcomeBlock(sim)}
     <p class="win-truth">${winTruth(best)}</p>
-    <p class="fineprint">Based on ${whole(SIM_RUNS)} simulated sessions of ${n} tickets using the prizes still left. A lucky 1 in 10 got back ${money(sim.p90)} or more.</p>
-    ${alts.length ? `<p class="eyebrow">Also good at this budget</p><div class="alts">${alts.map(g => `<button class="alt" data-id="${g.id}">${thumb(g)}<span>${safe(g.name)}<small>${money(g.cost)} · ${cents(g.rtp)} per $1</small></span>${scoreBadge(g)}</button>`).join('')}</div>` : ''}`;
+    <p class="fineprint">Based on ${whole(SIM_RUNS)} simulated ${n}-ticket games using real remaining odds. 1 in 10 lucky sessions got back ${money(sim.p90)} or more.</p>
+    ${alts.length ? `<p class="eyebrow">Also worth trying</p><div class="alts">${alts.map(g => `<button class="alt" data-id="${g.id}">${thumb(g)}<span>${safe(g.name)}<small>${money(g.cost)} · expect ${cents(g.rtp)} back per dollar</small></span>${scoreBadge(g)}</button>`).join('')}</div>` : ''}`;
 }
 
 function renderNew() {
@@ -228,7 +228,7 @@ function renderList() {
     <button class="row" data-id="${g.id}">
       <span class="rank">${i + 1}</span>${thumb(g)}
       <span class="row-main"><b>${safe(g.name)}${g.is_new ? ' <em class="tag-new">NEW</em>' : ''}</b>
-        <small>${money(g.cost)} · ${g.rtp_is_floor ? '≥' : ''}${cents(g.rtp)} per $1 · top ${safe(g.top_label)} ${g.top_rem}/${g.top_total} left</small>
+        <small>${money(g.cost)} · expect ${g.rtp_is_floor ? '≥' : ''}${cents(g.rtp)} back · top ${safe(g.top_label)} ${g.top_rem}/${g.top_total} left</small>
         <span class="bar"><i style="width:${Math.round((1 - g.sold_pct) * 100)}%"></i></span></span>
       ${scoreBadge(g)}
     </button>`).join('') || '<p class="muted">No games match.</p>';
@@ -243,10 +243,10 @@ function openDetail(id) {
     <div class="detail-head"><img src="${safe(g.img)}" alt="" onerror="this.style.visibility='hidden'"><div><h3>${safe(g.name)}</h3><p>${money(g.cost)} · Game #${g.id} · Rank ${g.rank} of ${data.game_count}</p>${scoreBadge(g)}</div></div>
     <ul class="reasons">${g.reasons.map(r => `<li>${safe(r)}</li>`).join('')}</ul>
     <div class="stats four">
-      <div><small>Payback now</small><b>${g.rtp_is_floor ? '≥' : ''}${cents(g.rtp)}</b></div>
-      <div><small>At launch</small><b>${cents(g.launch_rtp)}</b></div>
-      <div><small>Drift</small><b class="${drift >= 0 ? 'pos' : 'neg'}">${drift >= 0 ? '+' : ''}${drift.toFixed(1)}</b></div>
-      <div><small>Sold (est.)</small><b>${pct(g.sold_pct)}</b></div>
+      <div><small>Now return</small><b>${g.rtp_is_floor ? '≥' : ''}${cents(g.rtp)}</b></div>
+      <div><small>Started at</small><b>${cents(g.launch_rtp)}</b></div>
+      <div><small>Prize pattern change</small><b class="${drift >= 0 ? 'pos' : 'neg'}">${drift >= 0 ? '+' : ''}${drift.toFixed(1)}</b></div>
+      <div><small>Sold so far</small><b>${pct(g.sold_pct)}</b></div>
       <div><small>Any prize</small><b>1 in ${g.odds}</b></div>
       <div><small>Top prize</small><b>${g.top_one_in ? `1 in ${whole(g.top_one_in)}` : 'gone'}</b></div>
       <div><small>Tickets left</small><b>${whole(g.est_remaining)}</b></div>
@@ -352,14 +352,14 @@ function renderOdds() {
     const tickets = Math.floor(budget / game.cost);
     const chanceAny = (1 - Math.pow(1 - game.p_any, tickets)) * 100;
     const chanceProfit = (1 - Math.pow(1 - game.p_profit, tickets)) * 100;
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Tickets you can buy</div><div class="odds-stat-value">${tickets} × $${game.cost}</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to win something</div><div class="odds-stat-value">${chanceAny.toFixed(0)}%</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to make a profit</div><div class="odds-stat-value">${chanceProfit.toFixed(0)}%</div></div>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Expected to get back</div><div class="odds-stat-value">$${(budget * game.rtp).toFixed(0)}</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Your tickets</div><div class="odds-stat-value">${tickets}</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to win anything</div><div class="odds-stat-value">${chanceAny.toFixed(0)}%</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Chance to come out ahead</div><div class="odds-stat-value">${chanceProfit.toFixed(0)}%</div></div>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">You'll get back (on average)</div><div class="odds-stat-value">$${(budget * game.rtp).toFixed(0)}</div></div>`);
   } else if (data?.games.length) {
     const avg_win = (data.games.reduce((a, g) => a + (1 - Math.pow(1 - g.p_any, 1)), 0) / data.games.length * 100);
-    html.push(`<p class="muted small">Pick a game above to see your odds, or:</p>`);
-    html.push(`<div class="odds-stat"><div class="odds-stat-label">Average: chance to win on 1 ticket</div><div class="odds-stat-value">${avg_win.toFixed(0)}%</div></div>`);
+    html.push(`<p class="muted small">Pick a game to see your odds:</p>`);
+    html.push(`<div class="odds-stat"><div class="odds-stat-label">Across all games: 1 ticket wins</div><div class="odds-stat-value">${avg_win.toFixed(0)}% of the time</div></div>`);
   }
   $('#odds-result').innerHTML = html.join('');
 }

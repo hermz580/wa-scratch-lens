@@ -87,8 +87,8 @@
       <div class="chips" id="price-chips"></div>
       <div class="filter-row">
         <select id="sort" aria-label="Sort by">
-          <option value="score">Smart Score</option>
-          <option value="rtp">Payback per $1</option>
+          <option value="score">Value Rating</option>
+          <option value="rtp">Expected return per $1</option>
           <option value="top">Top-prize odds</option>
           <option value="cost">Price</option>
         </select>
@@ -133,16 +133,16 @@
 
   <section class="card how">
     <details>
-      <summary>How the Smart Score works</summary>
-      <p>Every game gets 0–100 from the official WA Lottery prize table:</p>
+      <summary>How the Value Rating works</summary>
+      <p>Each game scores 0–100 based on:</p>
       <ul>
-        <li><b>Payback (45%)</b> — estimated cents returned per $1 on the tickets still unsold.</li>
-        <li><b>Drift (30%)</b> — payback now vs. at launch. Positive means big prizes are outlasting small ones.</li>
-        <li><b>Big-prize share (25%)</b> — share of the top 3 prize tiers left vs. share of all winners left.</li>
-        <li>Games with <b>every top prize gone</b> are cut by 45% and marked Skip.</li>
+        <li><b>Return value (45%)</b> — how much you typically get back per dollar on unsold tickets.</li>
+        <li><b>Prize pattern (30%)</b> — how odds have changed since launch. Better if big prizes outlast small ones.</li>
+        <li><b>Premium prize share (25%)</b> — what % of wins come from the top 3 prizes vs. all wins.</li>
+        <li>Games where <b>the big prize is gone</b> score 45% lower and show "Skip".</li>
       </ul>
-      <p><b>Chance to end ahead</b> comes from 3,000 simulated sessions at your budget using the remaining prize odds.</p>
-      <p>Remaining tickets are estimated as <i>overall odds × winning prizes left</i>. The Lottery reports <i>claimed</i> prizes, so a recently won but unclaimed prize can still look available.</p>
+      <p><b>Your win chance</b> is simulated 3,000 times at your budget using real remaining odds.</p>
+      <p>Unsold tickets estimated as: overall odds × wins left. Lottery reports claimed wins, so unclaimed winners may still show as available.</p>
     </details>
     <details>
       <summary>Put it on your home screen</summary>
@@ -180,7 +180,7 @@
     </div>
     <details class="paytable"><summary>Pays &amp; the truth about slots</summary>
       <ul id="slot-paytable"></ul>
-      <p>This machine is built to pay back <b id="slot-rtp">86%</b> over time, like real slots. Watch “Your payback” — a hot streak can top 100%, but the more you spin, the closer it slides to the house number. Same lesson as scratch tickets.</p>
+      <p>This machine returns <b id=”slot-rtp”>86%</b> on average, like real casinos. Watch “Your payback” — lucky streaks can hit 100%+, but over time it slides toward 86%. Same math as real scratch tickets.</p>
       <button id="slot-reset" class="ghost small" type="button">Reset stats</button>
     </details>
   </div>
@@ -189,7 +189,7 @@
 <dialog id="detail"><div id="detail-body"></div><button class="close" id="detail-close" aria-label="Close">✕</button></dialog>
 
 <footer>
-  <p><b>Scratch tickets lose money on average — every game here pays back less than $1 per $1.</b> The Smart Score finds the better-value games; it cannot predict a winning ticket. Only spend what you're fine losing.</p>
+  <p><b>Scratch tickets lose money on average — you get back less than you spend.</b> The Value Rating finds games with better odds, but it can't pick winners. Only spend money you're okay losing.</p>
   <p>Need help? Call or text <a href="tel:18005476133">1-800-547-6133</a> · <a href="https://evergreencpg.org/">Evergreen Council on Problem Gambling</a></p>
   <p class="muted small">Not affiliated with Washington's Lottery. Data: <a href="https://walottery.com/Scratch/explorer.aspx">walottery.com</a>. Must be 18+.</p>
 </footer>
