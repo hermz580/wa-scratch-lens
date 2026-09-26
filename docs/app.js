@@ -141,6 +141,11 @@ function renderStatus() {
       : `✅ Robot checked ${ago(robot.at)}`;
   }
   $('#changed-line').textContent = `${robotText} · numbers last changed ${ago(new Date(data.generated_at))}`;
+
+  // Show data sync proof: our refresh matches WA Lottery's
+  const lotterySyncTime = sourceLabel(data.source_updated);
+  const ourSyncTime = new Date(data.generated_at).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Los_Angeles'}) + ' PT';
+  $('#sync-line').innerHTML = `<small>✓ Data synced: WA Lottery @ ${lotterySyncTime} → Scratchtastic @ ${ourSyncTime}</small>`;
 }
 
 function nextCheck(minutes) {

@@ -44,6 +44,7 @@
   <div class="status-lines">
     <span id="source-line">Loading live data…</span>
     <span id="changed-line"></span>
+    <span id="sync-line" class="sync-time"></span>
   </div>
 </section>
 
@@ -155,8 +156,13 @@
 <button id="slots-fab" class="slots-fab" type="button" aria-controls="slots" aria-expanded="false">🎰 <span>Free Slots</span></button>
 <aside id="slots" class="slots" aria-label="Harpstar free slots">
   <div class="slots-head">
-    <div><b class="slots-title">Harpstar Slots</b><small>Free play · fun coins have no value</small></div>
+    <div><b id="slots-title" class="slots-title">Harpstar Slots</b><small>Free play · fun coins have no value</small></div>
     <button id="slots-close" class="icon-btn small-btn" type="button" aria-label="Close slots">✕</button>
+  </div>
+  <div class="game-selector">
+    <button type="button" data-game="classic" class="game-btn on">🎰 Classic</button>
+    <button type="button" data-game="premium" class="game-btn">💎 Premium</button>
+    <button type="button" data-game="bonus" class="game-btn">🎊 Bonus</button>
   </div>
   <div class="machine">
     <div class="reels">
@@ -167,7 +173,7 @@
     </div>
     <p id="slot-msg" class="slot-msg" aria-live="polite"></p>
     <div class="slot-controls">
-      <div class="chips bet-chips"><span>Bet</span><button type="button" data-bet="1">1</button><button type="button" data-bet="5">5</button><button type="button" data-bet="10">10</button></div>
+      <div class="chips bet-chips"><span>Bet</span><button type="button" data-bet="1">1</button><button type="button" data-bet="5">5</button><button type="button" data-bet="10">10</button><button type="button" data-bet="25">25</button><button type="button" data-bet="50">50</button></div>
       <button id="slot-spin" class="spin-btn" type="button">SPIN</button>
       <button id="slot-refill" class="ghost" type="button" hidden>Refill 100 free coins</button>
     </div>
