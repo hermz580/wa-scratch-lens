@@ -125,7 +125,9 @@ def _rounded(value):
 def run(data_dir: Path = DATA_DIR, fetcher=fetch_games, now: datetime | None = None, force: bool = False) -> bool:
     """Fetch, build and write. Returns True when files changed."""
     now = now or datetime.now(timezone.utc)
-    raw = fetcher()
+    result = fetcher()
+    # Support both old (list) and new (tuple) fetcher signatures for backward compatibility
+    raw = result if isinstance(result, list) else result[0]
     if not raw:
         raise ValueError("WA Lottery feed returned no games")
     history_path, latest_path = data_dir / "history.json", data_dir / "latest.json"
