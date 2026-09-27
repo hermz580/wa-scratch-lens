@@ -379,7 +379,7 @@ function renderOdds() {
     html.push(`  <div class="detail-row"><span>Expected winnings</span><b>${money(sim.mean)}</b><small class="muted">(average)</small></div>`);
     html.push(`  <div class="detail-row"><span>Typical outcome</span><b>${money(sim.median)}</b><small class="muted">(median win)</small></div>`);
     html.push(`  <div class="detail-row"><span>Best 10% get</span><b>${money(sim.p90)}</b><small class="muted">(90th percentile)</small></div>`);
-    html.push(`  <div class="detail-row"><span>House edge cost</span><b class="neg">-${money(sim.spent - sim.mean)}</b><small class="muted">typical loss</small></div>`);
+    html.push(`  <div class="detail-row"><span>House edge cost</span><b class="neg">${money(sim.spent - sim.mean)}</b><small class="muted">typical loss</small></div>`);
     html.push(`  <div class="detail-row"><span>Big win odds</span><b>${sim.big ? pct(sim.big) : '&lt;1%'}</b><small class="muted">(5× or more)</small></div>`);
     html.push(`</div>`);
 
