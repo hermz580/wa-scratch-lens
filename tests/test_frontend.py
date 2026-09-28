@@ -62,8 +62,11 @@ class FrontendTests(unittest.TestCase):
     def test_schedule_matches_builder(self):
         import site_builder
         workflow = (ROOT / ".github" / "workflows" / "update-data.yml").read_text(encoding="utf-8")
-        minutes = re.search(r'cron: "([\d,]+) \*', workflow).group(1)
-        self.assertEqual([int(m) for m in minutes.split(",")], site_builder.CHECK_MINUTES)
+        # Extract minute value from all cron schedule lines
+        cron_minutes = re.findall(r'cron: "(\d+) \d+ \* \* \*', workflow)
+        # All should be consistent with CHECK_MINUTES
+        unique_minutes = set(int(m) for m in cron_minutes)
+        self.assertEqual(unique_minutes, set(site_builder.CHECK_MINUTES))
 
 
 if __name__ == "__main__":
