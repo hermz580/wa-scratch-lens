@@ -34,10 +34,16 @@ def extract_games(html: str) -> tuple[list[dict], dict]:
     sample = games[0]
     if not isinstance(sample, dict):
         raise ValueError("WA Lottery game data structure is invalid")
+    # The live feed keys each game's prize levels under "Prizes" (what analytics.py
+    # and smart_score.py read). It has never used "Tiers", so requiring that key
+    # rejected every real response.
     has_id = "ID" in sample or "Id" in sample
-    has_tiers = "Tiers" in sample
-    if not (has_id and has_tiers):
-        raise ValueError("WA Lottery game data structure is invalid")
+    has_prizes = isinstance(sample.get("Prizes"), list)
+    if not (has_id and has_prizes):
+        raise ValueError(
+            "WA Lottery game data structure is invalid: expected an Id and a Prizes list, "
+            f"got keys {sorted(sample)[:12]}"
+        )
     metadata = {
         "game_count": len(games),
         "generated_at": payload.get("GeneratedAt"),

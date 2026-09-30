@@ -5,10 +5,15 @@ from data_source import extract_games
 
 class ParserTests(unittest.TestCase):
     def test_extracts_embedded_all_games_json(self):
-        html = """<script>WaLottery.Scratch.data = { all: JSON.parse('{\"Games\":[{\"Id\":9,\"GameName\":\"NINE\",\"Tiers\":[]}]}') };</script>"""
+        html = """<script>WaLottery.Scratch.data = { all: JSON.parse('{\"Games\":[{\"Id\":9,\"GameName\":\"NINE\",\"Prizes\":[]}]}') };</script>"""
         games, metadata = extract_games(html)
-        self.assertEqual(games, [{"Id": 9, "GameName": "NINE", "Tiers": []}])
+        self.assertEqual(games, [{"Id": 9, "GameName": "NINE", "Prizes": []}])
         self.assertIsInstance(metadata, dict)
+
+    def test_rejects_games_without_prizes_list(self):
+        html = "all: JSON.parse('{\"Games\":[{\"Id\":9,\"Tiers\":[]}]}')"
+        with self.assertRaisesRegex(ValueError, "Prizes"):
+            extract_games(html)
 
     def test_missing_payload_raises_clear_error(self):
         with self.assertRaisesRegex(ValueError, "embedded game data"):
@@ -18,7 +23,7 @@ class ParserTests(unittest.TestCase):
 class FallbackSourceTests(unittest.TestCase):
     def test_uses_backup_page_when_explorer_fails(self):
         import data_source
-        good = "all: JSON.parse('{\"Games\": [{\"Id\": 1, \"Tiers\": []}]}')"
+        good = "all: JSON.parse('{\"Games\": [{\"Id\": 1, \"Prizes\": []}]}')"
         calls = []
         def fake(url, timeout):
             calls.append(url)
@@ -26,7 +31,7 @@ class FallbackSourceTests(unittest.TestCase):
                 raise OSError("explorer down")
             return good
         games, metadata = data_source.fetch_games(fetch_html=fake)
-        self.assertEqual(games, [{"Id": 1, "Tiers": []}])
+        self.assertEqual(games, [{"Id": 1, "Prizes": []}])
         self.assertEqual(calls, [data_source.SOURCE_URL, *data_source.FALLBACK_URLS])
 
     def test_reports_every_failed_source(self):
