@@ -132,15 +132,24 @@ async function loadRobot() {
 
 function renderStatus() {
   $('#source-line').innerHTML = `WA Lottery published: <b>${safe(sourceLabel(data.source_updated))}</b> · ${data.game_count} games`;
-  let robotText = 'Robot status loading…';
+  let statusDot = '🟡', statusText = 'Checking…';
   if (robot) {
-    const late = Date.now() - robot.at > 75 * 60 * 1000;
-    robotText = robot.status !== 'completed' ? '🔄 Robot is checking right now…'
-      : !robot.ok ? `⚠️ Robot's last check ${ago(robot.at)} failed — will retry`
-      : late ? `⏳ Robot last checked ${ago(robot.at)} (GitHub is running late)`
-      : `✅ Robot checked ${ago(robot.at)}`;
+    const stale = Date.now() - robot.at > 24 * 60 * 60 * 1000;
+    if (robot.status !== 'completed') {
+      statusDot = '🟡';
+      statusText = 'Checking…';
+    } else if (!robot.ok) {
+      statusDot = '🔴';
+      statusText = 'Sync failed';
+    } else if (stale) {
+      statusDot = '🟡';
+      statusText = 'Data aging';
+    } else {
+      statusDot = '🟢';
+      statusText = 'Up to date';
+    }
   }
-  $('#changed-line').textContent = `${robotText} · numbers last changed ${ago(new Date(data.generated_at))}`;
+  $('#changed-line').textContent = `${statusDot} ${statusText}`;
 
   // Show data sync proof: our refresh matches WA Lottery's
   const lotterySyncTime = sourceLabel(data.source_updated);
