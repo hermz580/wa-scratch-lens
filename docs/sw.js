@@ -1,5 +1,5 @@
 // Offline support: app shell cache-first, game data network-first.
-const SHELL = 'scratch-lens-shell-v7';
+const SHELL = 'scratch-lens-shell-v8';
 const DATA = 'scratch-lens-data';
 const SHELL_FILES = ['./', 'index.html', 'app.js', 'slots.js', 'styles.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'scratchtastic.mp3', 'jackpot.mp3'];
 
@@ -23,11 +23,11 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.open(DATA).then(c => c.match(key)).then(hit => hit || Response.error())));
     return;
   }
-  // Shell: serve cache fast, refresh it in the background.
-  e.respondWith(caches.open(SHELL).then(c => c.match(e.request, {ignoreSearch: true}).then(hit => {
-    const net = fetch(e.request).then(res => { if (res.ok) c.put(e.request, res.clone()); return res; }).catch(() => hit);
-    return hit || net;
-  })));
+  // Shell: network-first so new versions show on the next open; cache only when offline.
+  e.respondWith(caches.open(SHELL).then(c => fetch(e.request, {cache: 'no-cache'}).then(res => {
+    if (res.ok) c.put(e.request, res.clone());
+    return res;
+  }).catch(() => c.match(e.request, {ignoreSearch: true}).then(hit => hit || Response.error()))));
 });
 
 self.addEventListener('notificationclick', e => {
