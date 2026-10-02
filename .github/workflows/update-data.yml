@@ -34,6 +34,8 @@ jobs:
           python-version: "3.12"
       - name: Fetch and score games
         run: python site_builder.py
+      - name: Fetch winning store hotspots
+        run: python hotspots.py # never fails the job; skips on error
       - name: Commit if changed
         id: publish
         run: |
