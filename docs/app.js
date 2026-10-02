@@ -535,7 +535,13 @@ $('#near-btn')?.addEventListener('click', () => {
   }, () => showBanner('Location permission was denied — showing statewide stores.'), {timeout: 10000, maximumAge: 600000});
 });
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  // When a new app version installs, reload once so it shows right away.
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
+  navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'}).then(r => r.update()).catch(() => {});
+}
 load(); loadHotspots();
 setInterval(tick, 1000);
 setInterval(() => { load(true); loadHotspots(); }, POLL_MS);
