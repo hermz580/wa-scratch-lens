@@ -21,7 +21,7 @@ It works offline with the last data it loaded.
 2. GitHub repo → **Settings → Pages** → Source: *Deploy from a branch* → Branch `main`, folder `/docs` → Save.
 3. **Actions** tab → *Update lottery data* → *Run workflow* once to confirm it works.
 
-After that, a scheduled GitHub Action checks walottery.com every 15 minutes (at :07, :22, :37 and :52). It commits new data only when the lottery numbers actually changed. WA usually publishes once a day, overnight.
+After that, a scheduled GitHub Action checks walottery.com 4 times a day (1:30, 7:30, 13:30 and 19:30 UTC). It commits new data only when the lottery numbers actually changed. WA usually publishes once a day, overnight.
 
 ## What the app shows
 
@@ -35,6 +35,7 @@ After that, a scheduled GitHub Action checks walottery.com every 15 minutes (at 
 - **What changed:** new games, top prizes claimed, games retired.
 - **Countdown timer** to the next automatic check. The app reloads fresh data by itself.
 - **Game details:** prize table, odds now, sell-out estimate, and outcome simulation.
+- **Winning stores:** top cities and stores for $600+ winners from WA's winners map, a 📍 Near me sort, and a feed of newly added winning stores. Each store's history is tracked so repeat winners are counted over time. Past winners don't change anyone's odds.
 - **My results:** log what you spend and win (stored only on your phone) to see your real net.
 
 ## Honest limits

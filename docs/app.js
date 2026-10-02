@@ -477,7 +477,65 @@ window.playJackpot = () => {
   if (playPromise && playPromise.catch) playPromise.catch(() => console.log('Audio blocked'));
 };
 
+// ---------- winning stores (hotspots) ----------
+const HOT_URL = 'data/hotspots.json';
+let hot = null, hotTab = 'cities', here = null;
+const miles = (a, b) => { // haversine, in miles
+  const r = x => x * Math.PI / 180, dLat = r(b.lat - a.lat), dLon = r(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 3958.8 * 2 * Math.asin(Math.sqrt(h));
+};
+function storeRow(s, i) {
+  const dist = here ? `<small class="muted"> · ${miles(here, s).toFixed(1)} mi</small>` : '';
+  const map = `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}`;
+  return `<a class="hot-row" href="${map}" target="_blank" rel="noopener"><span class="hot-rank">${i + 1}</span>
+    <span class="hot-main"><b>${safe(s.name)}</b>${s.is_new ? ' <span class="tag-new">NEW</span>' : ''}
+    <small class="muted">${safe(s.city)}${dist}${s.wins > 1 ? ` · ${s.wins} wins seen` : ''}</small></span>
+    <span class="hot-amt">${money(s.amount)}</span></a>`;
+}
+function renderHotspots() {
+  const box = $('#hot-list'); if (!box) return;
+  if (!hot) { box.innerHTML = '<p class="muted">Store data isn\'t available yet.</p>'; return; }
+  $('#near-btn').textContent = here ? '📍 Sorted by distance' : '📍 Near me';
+  if (hotTab === 'cities') {
+    const top = hot.cities.slice(0, 8), max = top[0]?.wins || 1;
+    box.innerHTML = top.map((c, i) => `<div class="hot-row"><span class="hot-rank">${i + 1}</span>
+      <span class="hot-main"><b>${safe(c.city)}</b><small class="muted">${c.wins} winner${c.wins > 1 ? 's' : ''} · biggest ${money(c.biggest)}</small>
+      <span class="hot-bar"><i style="width:${Math.round(c.wins / max * 100)}%"></i></span></span>
+      <span class="hot-amt">${money(c.total)}</span></div>`).join('');
+  } else if (hotTab === 'recent') {
+    box.innerHTML = hot.events.length ? hot.events.map(e => `<div class="hot-row"><span class="hot-main"><b>${safe(e.message)}</b>
+      <small class="muted">${ago(new Date(e.t))}</small></span></div>`).join('')
+      : '<p class="muted small">No new winning stores yet — we started tracking recently. New ones show up here as WA adds them.</p>';
+  } else {
+    const list = here ? [...hot.stores].sort((a, b) => miles(here, a) - miles(here, b)) : hot.stores;
+    box.innerHTML = list.slice(0, 10).map(storeRow).join('');
+  }
+}
+async function loadHotspots() {
+  try {
+    const r = await fetch(`${HOT_URL}?t=${Math.floor(Date.now() / 60000)}`, {cache: 'no-store'});
+    if (r.ok) hot = await r.json();
+  } catch { /* offline: keep what we have */ }
+  renderHotspots();
+}
+$('#hot-tabs')?.addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  hotTab = b.dataset.tab;
+  document.querySelectorAll('#hot-tabs button').forEach(x => x.classList.toggle('on', x === b));
+  renderHotspots();
+});
+$('#near-btn')?.addEventListener('click', () => {
+  if (!navigator.geolocation) return showBanner('Location isn\'t available on this device.');
+  navigator.geolocation.getCurrentPosition(p => {
+    here = {lat: p.coords.latitude, lon: p.coords.longitude};
+    hotTab = 'stores';
+    document.querySelectorAll('#hot-tabs button').forEach(x => x.classList.toggle('on', x.dataset.tab === 'stores'));
+    renderHotspots();
+  }, () => showBanner('Location permission was denied — showing statewide stores.'), {timeout: 10000, maximumAge: 600000});
+});
+
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
-load();
+load(); loadHotspots();
 setInterval(tick, 1000);
-setInterval(() => load(true), POLL_MS);
+setInterval(() => { load(true); loadHotspots(); }, POLL_MS);
